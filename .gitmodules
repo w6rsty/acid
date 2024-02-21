@@ -1,0 +1,12 @@
+[submodule "3rdlibs/ImGui/ImGuiMain"]
+	path = 3rdlibs/ImGui/ImGuiMain
+	url = https://github.com/w6rsty/imgui
+[submodule "3rdlibs/ImGui/ImGuizmo"]
+	path = 3rdlibs/ImGui/ImGuizmo
+	url = https://github.com/w6rsty/ImGuizmo
+[submodule "3rdlibs/GLM"]
+	path = 3rdlibs/GLM
+	url = https://github.com/g-truc/glm
+[submodule "3rdlibs/GLFW"]
+	path = 3rdlibs/GLFW
+	url = https://github.com/glfw/glfw
