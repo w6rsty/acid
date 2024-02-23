@@ -9,7 +9,7 @@
 
 namespace acid
 {
-    
+
 Ref<Window> Window::Create(const WindowCreateInfo& info)
 {
     return CreateRef<Window>(info);
@@ -31,7 +31,6 @@ Window::Window(const WindowCreateInfo& info)
 
     context_ = GraphicContext::Create(window);
     context_->Init();
-
 }
 
 Window::~Window()

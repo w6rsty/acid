@@ -41,6 +41,7 @@ void OpenGLVertexBuffer::SetData(float* data, size_t size)
 }
 
 OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* data, size_t count)
+: count_(count)
 {
     glCreateBuffers(1, &rendererID_);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID_);

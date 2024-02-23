@@ -15,8 +15,10 @@ public:
     virtual void Bind() const override;
     virtual void Unbind() const override;
 
-    virtual void SetVertexBuffer(const Ref<VertexBuffer>& buffer) override { vertexBuffer_ = buffer; }
-    virtual void SetIndexBuffer(const Ref<IndexBuffer>& buffer) override { indexBuffer_ = buffer; }
+    virtual void SetVertexBuffer(const Ref<VertexBuffer>& buffer) override;
+    virtual void SetIndexBuffer(const Ref<IndexBuffer>& buffer) override;
+
+    virtual uint32_t GetIndexCount() const override { return indexBuffer_->GetCount(); }
 private:
     uint32_t rendererID_;
 
