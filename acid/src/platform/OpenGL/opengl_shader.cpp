@@ -1,3 +1,5 @@
+/// TODO: Add uniform location cache
+/// TODO: Add uniform auto read
 /// TODO: Change assertion way to support runtime error handling
 
 #include "platform/OpenGL/opengl_shader.hpp"

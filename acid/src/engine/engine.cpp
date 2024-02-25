@@ -1,68 +1,48 @@
 #include "engine/engine.hpp"
 
-#include "renderer/shader.hpp"
+#include "geometry/geo.hpp"
+#include "renderer/camera/scene_camera.hpp"
 
 #include "glad/glad.h"
+#include "glm/gtc/matrix_transform.hpp"
 
 namespace acid
 {
 
 Engine::Engine()
 {
-    window_ = Window::Create({});
-
-    vertexArray_ = VertexArray::Create();
-    float vertices[] = {
-        -0.5f, -0.5f,
-         0.5f, -0.5f,
-         0.5f,  0.5f,
-        -0.5f,  0.5f
-    };
-    Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(vertices, sizeof(vertices));
-    vertexBuffer->SetLayout({
-        { VertexDataType::Float2, "a_Position"}
-    });
-    vertexArray_->SetVertexBuffer(vertexBuffer);
-    uint32_t indices[] = {
-        0, 1, 2,
-        2, 3, 0
-    };
-    Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
-    vertexArray_->SetIndexBuffer(indexBuffer);
-
-    const std::string vertexSrc = R"(
-        #version 330 core
-
-        layout(location = 0) in vec3 a_Position;
-
-        void main()
-        {
-            gl_Position = vec4(a_Position, 1.0);
-        }
-    )";
-
-    const std::string fragmentSrc = R"(
-        #version 330 core
-
-        layout(location = 0) out vec4 color;
-
-        void main()
-        {
-            color = vec4(1.0, 0.0, 0.0, 1.0);
-        }
-    )";
-
-    shader_ = Shader::Create(vertexSrc, fragmentSrc);
-}
+    Init();
+} 
 
 Engine::~Engine()
 {
-
+    running_ = false;
 }
 
 void Engine::Init()
 {
+    window_ = Window::Create({});
 
+    vertexArray_ = VertexArray::Create();
+
+    auto info = geo::Box::UnitData();
+    Ref<VertexBuffer> vertexBuffer = VertexBuffer::Create(info.Vertices.data(), info.VertexSize);
+    vertexBuffer->SetLayout({
+        { VertexDataType::Float3, "a_Position" }
+    });
+    vertexArray_->SetVertexBuffer(vertexBuffer);
+    Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(info.Indices.data(), info.Indices.size());
+    vertexArray_->SetIndexBuffer(indexBuffer);
+
+    shader_ = Shader::Create("assets/shaders/plain.shader");
+    shader_->Bind();
+    shader_->SetUniformFloat4("u_Color", { 0.2f, 0.3f, 0.8f, 1.0f });
+
+    camera_ = CreateRef<SceneCamera>();
+    camera_->SetPerspective(1280.0f / 720.0f, 45.0f, 0.01f, 1000.0f);
+    // camera_->SetOrthographic(1280.0f / 720.0f, 2.0f, -2.0f, 2.0f);
+    camera_->SetPosition({0.0f, 0.0f, 2.0f});
+    camera_->SetRotation({0.0f, 45.0f, 0.0f});
 }
 
 void Engine::OnAttach()
@@ -78,12 +58,16 @@ void Engine::OnDetach()
 
 void Engine::Run()
 {
-    while (1)
+
+
+    while (running_)
     {
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shader_->Bind();
+        shader_->SetUniformMat4("u_Projection", camera_->GetProjectionMatrix());
+        shader_->SetUniformMat4("u_View", camera_->GetViewMatrix());
         vertexArray_->Bind();
         glDrawElements(GL_TRIANGLES, vertexArray_->GetIndexCount(), GL_UNSIGNED_INT, nullptr);
 

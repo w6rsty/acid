@@ -7,8 +7,13 @@
 
 #include "window/window.hpp"
 
+#include "geometry/geo.hpp"
+
 #include "renderer/buffer.hpp"
 #include "renderer/vertex_array.hpp"
 #include "renderer/shader.hpp"
+
+#include "renderer/camera/camera.hpp"
+#include "renderer/camera/scene_camera.hpp"
 
 #include "engine/engine.hpp"

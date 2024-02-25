@@ -10,7 +10,9 @@ namespace acid
 
 OpenGLGraphicContext::OpenGLGraphicContext(GLFWwindow* handle)
 : handle_(handle)
-{}
+{
+
+}
 
 void OpenGLGraphicContext::Init()
 {
@@ -21,6 +23,8 @@ void OpenGLGraphicContext::Init()
     AC_TAG_INFO("Vendor", glGetString(GL_VENDOR));
     AC_TAG_INFO("Device", glGetString(GL_RENDERER));
     AC_TAG_INFO("GLVersion", glGetString(GL_VERSION));
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 void OpenGLGraphicContext::Swap()
