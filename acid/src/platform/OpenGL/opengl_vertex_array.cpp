@@ -34,7 +34,7 @@ static GLenum VertexDataTypeToGLenum(VertexDataType type)
 
 OpenGLVertexArray::OpenGLVertexArray()
 {
-    glCreateVertexArrays(1, &rendererID_);
+    glGenVertexArrays(1, &rendererID_);
     glBindVertexArray(rendererID_);
 }
 

@@ -1,7 +1,8 @@
 #include "renderer/graphic_context.hpp"
 
-#ifdef ACID_PLATFORM_WINDOWS
+#ifdef ACID_PLATFORM_APPLE
 
+#include "core/log.hpp"
 #include "core/assert.hpp"
 #include "window/window.hpp"
 
@@ -17,13 +18,17 @@ Ref<Window> Window::Create(const WindowCreateInfo& info)
 
 Window::Window(const WindowCreateInfo& info)
 {
-    AC_LOG_TRACE("Creating Windows Window");
+    AC_LOG_TRACE("Creating Apple Window");
     config_.Title = info.Title;
     config_.Width = info.Width;
     config_.Height = info.Height;
     config_.VSync = info.VSync;
 
     int GLFWInitStatus = glfwInit();
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     AC_ASSERT_MSG(GLFWInitStatus, "Faild to Initialize GLFW");
 
     GLFWwindow* window = glfwCreateWindow(config_.Width, config_.Height, config_.Title.c_str(), nullptr, nullptr);

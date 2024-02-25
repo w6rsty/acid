@@ -1,2 +1,2 @@
-add_subdirectory(ImGuiMain)
 add_subdirectory(ImGuizmo)
+add_subdirectory(ImGuiMain)

@@ -9,5 +9,6 @@
 
 #include "renderer/buffer.hpp"
 #include "renderer/vertex_array.hpp"
+#include "renderer/shader.hpp"
 
 #include "engine/engine.hpp"
