@@ -1,3 +1,5 @@
+/// TODO: WE NEED AN APPLICATION to run the engine !!!!!
+/// TODO: And add imgui !!!
 #pragma once
 
 #include "window/window.hpp"
@@ -8,6 +10,7 @@
 namespace acid
 {
 
+/// Driven the core functions
 class Engine
 {
 public:

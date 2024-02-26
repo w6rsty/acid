@@ -12,7 +12,7 @@ OpenGLVertexBuffer::OpenGLVertexBuffer(size_t size)
     glBufferData(GL_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
 }
 
-OpenGLVertexBuffer::OpenGLVertexBuffer(float* vertices, size_t size)
+OpenGLVertexBuffer::OpenGLVertexBuffer(void* vertices, size_t size)
 {
     glGenBuffers(1, &rendererID_);
     glBindBuffer(GL_ARRAY_BUFFER, rendererID_);
@@ -35,7 +35,7 @@ void OpenGLVertexBuffer::Unbind() const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void OpenGLVertexBuffer::SetData(float* data, size_t size)
+void OpenGLVertexBuffer::SetData(void* data, size_t size)
 {
     glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
 }

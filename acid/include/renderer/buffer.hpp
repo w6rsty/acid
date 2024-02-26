@@ -63,12 +63,12 @@ public:
     
     virtual void Bind() const = 0;
     virtual void Unbind() const = 0;
-    virtual void SetData(float* data, size_t size) = 0;
+    virtual void SetData(void* data, size_t size) = 0;
     virtual void SetLayout(const VertexBufferLayout& layout) = 0;
     virtual VertexBufferLayout& GetLayout() = 0;
 
     static Ref<VertexBuffer> Create(size_t size);
-    static Ref<VertexBuffer> Create(float* vertices, size_t size);
+    static Ref<VertexBuffer> Create(void* vertices, size_t size);
 };
 
 class IndexBuffer

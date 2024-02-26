@@ -103,8 +103,8 @@ void SceneCamera::CalculateView()
 
     viewMatrix_ = glm::inverse(
         glm::scale(glm::mat4(1.0f), scale_)
-        * rotationMatrix
         * glm::translate(glm::mat4(1.0f), position_)
+        * rotationMatrix
     );
 }
 

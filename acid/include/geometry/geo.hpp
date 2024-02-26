@@ -2,12 +2,14 @@
 
 #include "core/base.hpp"
 #include "core/assert.hpp"
+#include "glm/geometric.hpp"
+#include "glm/gtc/constants.hpp"
+#include "renderer/vertex.hpp"
 
 #include "glm/glm.hpp"
 
 #include <utility>
 #include <vector>
-#include <cmath>
 
 namespace acid::geo
 {
@@ -21,7 +23,6 @@ enum class GeoType
     Rect,
     Circle,
     Triangle,
-    Polygon,
     Quad,
     // 3D
     Box,
@@ -29,14 +30,12 @@ enum class GeoType
     Tetrahedron,
     Pyramid,
     Cuboid,
-    Cylinder,
-    Cone,
     Capsule
 };
 
 struct GeoData
 {
-    std::vector<float> Vertices;
+    std::vector<Vertex> Vertices;
     size_t VertexSize;
     std::vector<uint32_t> Indices;
     size_t IndexCount;
@@ -45,86 +44,56 @@ struct GeoData
 struct Point
 {
     glm::vec3 Position;
-
-    static GeoData UnitData()
-    {
-        return {
-            { 0.0f, 0.0f, 0.0f },
-            3 * sizeof(float),
-            {},
-            0
-        };
-    }
 };
 
 struct Line
 {
     glm::vec3 Start;
     glm::vec3 End;
-
-    static GeoData UnitData()
-    {
-        return {
-            { 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f },
-            6 * sizeof(float),
-            { 0, 1 },
-            2
-        };
-    
-    }
 };
 
 // 2D ===============
 
 struct Rect
 {
-    glm::vec3 Origin;
+    glm::vec3 Origin = {0.0f, 0.0f, 0.0f};
     float Width;
     float Height;
-
-    static GeoData UnitData()
-    {
-        return {
-            { -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.5f, 0.5f, 0.0f, -0.5f, 0.5f, 0.0f },
-            12 * sizeof(float),
-            { 0, 1, 2, 2, 3, 0 },
-            6
-        };
-    
-    }
 };
 
 struct Circle
 {
-    glm::vec3 Center;
-    float Radius;
-    float precision;
+    glm::vec3 Center = {0.0f, 0.0f, 0.0f};
+    float Radius = 0.5f;
 
     static GeoData UnitData(uint32_t precision = 24)
     {
-        std::vector<float> vertices;
+        std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
-        vertices.reserve(3 * (precision + 1));
-        indices.reserve(3 * precision);
+        vertices.reserve(3 * (precision + 1) + 1);
+        indices.reserve(3 * precision + 1);
+        vertices.push_back({ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.5f } });
         for (uint32_t i = 0; i <= precision; i++)
         {
-            float angle = 2 * M_PI * i / precision;
-            vertices.push_back(0.5 * std::cos(angle));
-            vertices.push_back(0.5 * std::sin(angle));
-            vertices.push_back(0.0f);
-            if (i > 0)
+            Vertex vertex;
+            // use glm pi
+            float angle = 2 * glm::two_pi<float>() * i / precision;
+            glm::vec3 position = { 0.5f * glm::cos(angle), 0.5f * glm::sin(angle), 0.0f };
+            vertex.Position = position;
+            vertex.Normal = { 0.0f, 0.0f, 1.0f };
+            vertex.TexCoord = { 0.5f + 0.5f * glm::cos(angle), 0.5f + 0.5f * glm::sin(angle) };
+            vertices.push_back(vertex);
+
+            if (i < precision)
             {
                 indices.push_back(0);
-                indices.push_back(i);
-                indices.push_back(i - 1);
+                indices.push_back(i + 1);
+                indices.push_back(i + 2);
             }
         }
-        indices.push_back(0);
-        indices.push_back(precision);
-        indices.push_back(1);
         return {
             std::move(vertices),
-            3 * (precision + 1) * sizeof(float),
+            3 * (precision + 1) * sizeof(Vertex),
             std::move(indices),
             3 * precision
         };
@@ -140,8 +109,12 @@ struct Triangle
     static GeoData UnitData()
     {
         return {
-            { 0.0f, 0.5f, 0.0f, 0.5f, -0.5f, 0.0f, -0.5f, -0.5f, 0.0f },
-            9 * sizeof(float),
+            {
+                Vertex { {-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f} },
+                Vertex { { 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f} },
+                Vertex { { 0.0f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.5f, 1.0f} }
+            },
+            3 * sizeof(Vertex),
             { 0, 1, 2 },
             3
         };
@@ -149,23 +122,21 @@ struct Triangle
     }
 };
 
-struct Polygon
-{
-    std::vector<glm::vec3> Points;
-};
-
 struct Quad
 {
-    glm::vec3 A;
-    glm::vec3 B;
-    glm::vec3 C;
-    glm::vec3 D;
+    glm::vec3 Origin = {0.0f, 0.0f, 0.0f};
+    float Width = 1.0f;
 
     static GeoData UnitData()
     {
         return {
-            { -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.5f, 0.5f, 0.0f, -0.5f, 0.5f, 0.0f },
-            12 * sizeof(float),
+            {
+               Vertex { {-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f} },
+               Vertex { { 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f} },
+               Vertex { { 0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
+               Vertex { {-0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f} }
+            },
+            4 * sizeof(Vertex),
             { 0, 1, 2, 2, 3, 0 },
             6
         };
@@ -180,83 +151,52 @@ struct Box
     float Width;
     float Height;
     float Depth;
-
-    static GeoData UnitData()
-    {
-        return {
-            {
-                -0.5f, -0.5f, -0.5f,
-                 0.5f, -0.5f, -0.5f,
-                 0.5f,  0.5f, -0.5f,
-                -0.5f,  0.5f, -0.5f,
-                -0.5f, -0.5f,  0.5f,
-                 0.5f, -0.5f,  0.5f,
-                 0.5f,  0.5f,  0.5f,
-                -0.5f,  0.5f,  0.5f
-            },
-            24 * sizeof(float),
-            {
-                0, 1, 2, 2, 3, 0,
-                1, 5, 6, 6, 2, 1,
-                5, 4, 7, 7, 6, 5,
-                4, 0, 3, 3, 7, 4,
-                3, 2, 6, 6, 7, 3,
-                4, 5, 1, 1, 0, 4
-            },
-            36
-        };
-    }
 };
 
 struct Sphere
 {
-    glm::vec3 Center;
-    float Radius;
-    float precision;
+    glm::vec3 Center = {0.0f, 0.0f, 0.0f};
+    float Radius = 0.5f;
 
     static GeoData UnitData(uint32_t precision = 24)
     {
-        std::vector<float> vertices;
+        // use glm math
+        std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
-        vertices.reserve(3 * (precision + 1) * (precision + 1));
+        vertices.reserve((precision + 1) * (precision + 1));
         indices.reserve(6 * precision * precision);
         for (uint32_t i = 0; i <= precision; i++)
         {
-            float theta = M_PI * i / precision;
             for (uint32_t j = 0; j <= precision; j++)
             {
-                float phi = 2 * M_PI * j / precision;
-                vertices.push_back(0.5 * std::sin(theta) * std::cos(phi));
-                vertices.push_back(0.5 * std::sin(theta) * std::sin(phi));
-                vertices.push_back(0.5 * std::cos(theta));
-                if (i > 0 && j > 0)
-                {
-                    uint32_t a = (precision + 1) * i + j;
-                    uint32_t b = (precision + 1) * i + j - 1;
-                    uint32_t c = (precision + 1) * (i - 1) + j - 1;
-                    uint32_t d = (precision + 1) * (i - 1) + j;
-                    if (i < precision)
-                    {
-                        indices.push_back(a);
-                        indices.push_back(b);
-                        indices.push_back(c);
-                    }
-                    if (i > 1)
-                    {
-                        indices.push_back(a);
-                        indices.push_back(c);
-                        indices.push_back(d);
-                    }
-                }
+                Vertex vertex;
+                float y = glm::cos(glm::pi<float>() * i / precision);
+                float x = glm::sin(glm::pi<float>() * i / precision) * glm::cos(2 * glm::pi<float>() * j / precision);
+                float z = glm::sin(glm::pi<float>() * i / precision) * glm::sin(2 * glm::pi<float>() * j / precision);
+                vertex.Position = { 0.5f * x, 0.5f * y, 0.5f * z };
+                vertex.Normal = { x, y, z };
+                vertex.TexCoord = { (float)j / precision, (float)i / precision};
+                vertices[precision * i + j] = vertex;
+            }
+        }
+        for (uint32_t i = 0; i < precision; i++)
+        {
+            for (uint32_t j = 0; j < precision; j++)
+            {
+                indices.push_back(precision * i + j);
+                indices.push_back(precision * (i + 1) + j);
+                indices.push_back(precision * i + j + 1);
+                indices.push_back(precision * i + j + 1);
+                indices.push_back(precision * (i + 1) + j);
+                indices.push_back(precision * (i + 1) + j + 1);
             }
         }
         return {
             std::move(vertices),
-            3 * (precision + 1) * (precision + 1) * sizeof(float),
+            (precision + 1) * (precision + 1) * sizeof(Vertex),
             std::move(indices),
             6 * precision * precision
         };
-    
     }
 };
 
@@ -279,29 +219,27 @@ struct Pyramid
 
 struct Cuboid
 {
-    glm::vec3 A;
-    glm::vec3 B;
-    glm::vec3 C;
-    glm::vec3 D;
-    glm::vec3 E;
-    glm::vec3 F;
-    glm::vec3 G;
-    glm::vec3 H;
-};
+    glm::vec3 Origin = {0.0f, 0.0f, 0.0f};
+    float Width = 1.0f;
 
-struct Cylinder
-{
-    glm::vec3 Center;
-    float Radius;
-    float Height;
-    float precision;
-};
-
-struct Cone
-{
-    glm::vec3 Apex;
-    glm::vec3 Center;
-    float Radius;
+    static GeoData UnitData()
+    {
+        return {
+            {
+                Vertex { {-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f} },
+                Vertex { { 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f} },
+                Vertex { { 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f} },
+                Vertex { {-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f} },
+                Vertex { {-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 0.0f} },
+                Vertex { { 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 0.0f} },
+                Vertex { { 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 1.0f} },
+                Vertex { {-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 1.0f} }
+            },
+            8 * sizeof(Vertex),
+            { 0, 1, 2, 2, 3, 0, 1, 5, 6, 6, 2, 1, 5, 4, 7, 7, 6, 5, 4, 0, 3, 3, 7, 4, 3, 2, 6, 6, 7, 3, 0, 4, 5, 5, 1, 0 },
+            36
+        };
+    }
 };
 
 struct Capsule
@@ -309,7 +247,56 @@ struct Capsule
     glm::vec3 A;
     glm::vec3 B;
     float Radius;
-    float precision;
+
+    static GeoData UnitData(float radius = 0.5f, float height = 0.5f, uint32_t precision = 24)
+    {
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
+        vertices.reserve((precision + 1) * (precision + 1));
+        indices.reserve(6 * precision * precision);
+        AC_LOG_TRACE(vertices.capacity(), " ", vertices.size());
+        for (uint32_t i = 0; i <= precision; i++)
+        {
+            for (uint32_t j = 0; j <= precision; j++)
+            {
+                Vertex vertex;
+                float y = glm::cos(glm::pi<float>() * i / precision);
+                float x = glm::sin(glm::pi<float>() * i / precision) * glm::cos(2 * glm::pi<float>() * j / precision);
+                float z = glm::sin(glm::pi<float>() * i / precision) * glm::sin(2 * glm::pi<float>() * j / precision);
+                if (y < 0.0f)
+                {
+                    vertex.Position = { radius * x, radius * y - height / 2.0f, radius * z };
+                    vertex.Normal = { x, y, z};
+                }
+                else
+                {
+                    vertex.Position = { radius * x, radius * y + height / 2.0f, radius * z };
+                    vertex.Normal = { x, y, z };
+                }
+                vertex.TexCoord = { (float)j / precision, (float)i / precision};
+                vertices[precision * i + j] = vertex;
+            }
+        }
+        for (uint32_t i = 0; i < precision; i++)
+        {
+            for (uint32_t j = 0; j < precision; j++)
+            {
+                indices.push_back(precision * i + j);
+                indices.push_back(precision * (i + 1) + j);
+                indices.push_back(precision * i + j + 1);
+                indices.push_back(precision * i + j + 1);
+                indices.push_back(precision * (i + 1) + j);
+                indices.push_back(precision * (i + 1) + j + 1);
+            }
+        }
+        AC_LOG_TRACE(vertices.capacity(), " ", vertices.size());
+        return {
+            std::move(vertices),
+            2 * (precision + 1) * (precision + 1) * sizeof(Vertex),
+            std::move(indices),
+            6 * precision * precision
+        };
+    }
 };
 
 } // namespace acid::geo

@@ -9,12 +9,12 @@ class OpenGLVertexBuffer final : public VertexBuffer
 {
 public:
     OpenGLVertexBuffer(size_t size);
-    OpenGLVertexBuffer(float* vertices, size_t size);
+    OpenGLVertexBuffer(void* vertices, size_t size);
     virtual ~OpenGLVertexBuffer() override;
 
     virtual void Bind() const override;
     virtual void Unbind() const override;
-    virtual void SetData(float* data, size_t size) override;
+    virtual void SetData(void* data, size_t size) override;
     virtual void SetLayout(const VertexBufferLayout& layout) override { layout_ = layout; }
     virtual VertexBufferLayout& GetLayout() override { return layout_; }
 private:
