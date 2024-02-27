@@ -3,8 +3,6 @@
 #pragma once
 
 #include "window/window.hpp"
-#include "renderer/vertex_array.hpp"
-#include "renderer/shader.hpp"
 #include "renderer/camera/scene_camera.hpp"
 
 namespace acid

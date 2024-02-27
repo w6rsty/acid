@@ -1,13 +1,9 @@
 #include "engine/engine.hpp"
 
 #include "renderer/renderer.hpp"
-#include "renderer/renderer2d.hpp"
 #include "renderer/renderer_command.hpp"
 
 #include "glm/ext/matrix_transform.hpp"
-
-// demostration
-#include "GLFW/glfw3.h"
 
 namespace acid
 {
@@ -29,8 +25,7 @@ void Engine::Init()
 
     camera_ = CreateRef<SceneCamera>();
     camera_->SetPerspective(1280.0f / 720.0f, 30.0f, 0.01f, 1000.0f);
-    camera_->SetPosition({4.0f, 0.0f, 5.0f});
-    camera_->SetRotation({0.0f, 45.0f, 0.0f});
+    camera_->SetPosition({0.0f, 0.0f, 5.0f});
 
     // RendererCommand::DrawWireFrame(true);
 }
@@ -53,15 +48,20 @@ void Engine::Run()
         RendererCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
         RendererCommand::Clear();
 
-        Renderer::BeginScene(camera_);
+        Renderer3D::BeginScene(camera_);
 
-        Renderer::DrawCuboid(glm::mat4(1.0f));
-        Renderer::DrawCuboid(glm::translate(glm::mat4(1.0f), {-1.0f,  0.0f, 0.0f}));
-        Renderer::DrawCuboid(glm::translate(glm::mat4(1.0f), { 1.0f,  0.0f, 0.0f}));
-        Renderer::DrawCuboid(glm::translate(glm::mat4(1.0f), { 0.0f,  1.0f, 0.0f}));
-        Renderer::DrawCuboid(glm::translate(glm::mat4(1.0f), { 0.0f, -1.0f, 0.0f}));
+        // create a x-z terrain
+        for (int x = -10; x < 10; x++)
+        {
+            for (int z = -10; z < 0; z++)
+            {
+                glm::mat4 transform = glm::translate(glm::mat4(1.0f), {x * 2.0f, 0.0f, z * 2.0f});
+                Renderer3D::DrawQuad(transform);
+            }
+        }
 
-        Renderer::EndScene();
+
+        Renderer3D::EndScene();
 
         window_->OnUpdate(); 
     }

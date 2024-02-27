@@ -1,21 +1,27 @@
 #pragma once
 
-#include "renderer/camera/scene_camera.hpp"
+#include "renderer/renderer_command.hpp"
+#include "renderer/renderer2d.hpp"
+#include "renderer/renderer3d.hpp"
 
 namespace acid
 {
 
-/// Pure static 
 class Renderer
 {
 public:
-    static void Init();
-    static void Shutdown();
+    static void Init()
+    {  
+        RendererCommand::Init();
+        Renderer2D::Init();
+        Renderer3D::Init();
+    }
 
-    static void BeginScene(const Ref<SceneCamera>& camera);
-    static void EndScene();
-
-    static void DrawCuboid(const glm::mat4& transform);
+    static void Shutdown()
+    {
+        Renderer2D::Shutdown();
+        Renderer3D::Shutdown();
+    }
 };
 
 } // namespace acid
