@@ -7,13 +7,9 @@ namespace acid
 
 struct Vertex
 {
-    glm::vec3 Position;
-    glm::vec3 Normal;
-    glm::vec2 TexCoord;
-
-    Vertex(const glm::vec3 &position = { 0.0f, 0.0f, 0.0f }, const glm::vec3 &normal = { 0.0f, 0.0f, 0.0f }, const glm::vec2 &texCoord = { 0.0f, 0.0f })
-    : Position(position), Normal(normal), TexCoord(texCoord)
-    {}
+    glm::vec3 Position = { 0.0f, 0.0f, 0.0f };
+    glm::vec3 Normal = { 0.0f, 0.0f, 0.0f };
+    glm::vec2 TexCoord = { 0.0f, 0.0f };
 };
 
 } // namespace acid

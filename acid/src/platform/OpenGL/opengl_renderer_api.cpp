@@ -8,8 +8,7 @@ namespace acid
 void OpenGLRendererAPI::Init() 
 {
     glEnable(GL_DEPTH_TEST);
-    // draw frame line
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glEnable(GL_BLEND);
 }
 
 void OpenGLRendererAPI::Shutdown()
@@ -27,10 +26,22 @@ void OpenGLRendererAPI::Clear()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray> &vertexArray)
+void OpenGLRendererAPI::DrawIndexed(const Ref<VertexArray> &vertexArray, uint32_t indexCount)
 {
     vertexArray->Bind();
-    glDrawElements(GL_TRIANGLES, vertexArray->GetIndexCount(), GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+}
+
+void OpenGLRendererAPI::DrawWireFrame(bool enable)
+{
+    if (enable)
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    }
+    else
+    {
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    }
 }
 
 } // namespace acid

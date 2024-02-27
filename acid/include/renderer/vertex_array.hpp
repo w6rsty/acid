@@ -17,6 +17,9 @@ public:
     virtual void SetVertexBuffer(const Ref<VertexBuffer>& buffer) = 0;
     virtual void SetIndexBuffer(const Ref<IndexBuffer>& buffer) = 0;
 
+    virtual const Ref<VertexBuffer>& GetVertexBuffer() const = 0;
+    virtual const Ref<IndexBuffer>& GetIndexBuffer() const = 0;
+
     virtual uint32_t GetIndexCount() const = 0;
 
     static Ref<VertexArray> Create();

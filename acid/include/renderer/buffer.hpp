@@ -63,7 +63,7 @@ public:
     
     virtual void Bind() const = 0;
     virtual void Unbind() const = 0;
-    virtual void SetData(void* data, size_t size) = 0;
+    virtual void SetData(void* data, size_t size, size_t offset = 0) = 0;
     virtual void SetLayout(const VertexBufferLayout& layout) = 0;
     virtual VertexBufferLayout& GetLayout() = 0;
 
@@ -78,10 +78,12 @@ public:
 
     virtual void Bind() const = 0;
     virtual void Unbind() const = 0;
+    virtual void SetData(void* data, size_t size, size_t offset = 0) = 0;
 
     virtual uint32_t GetCount() const = 0;
 
-    static Ref<IndexBuffer> Create(uint32_t* data, size_t count);
+    static Ref<IndexBuffer> Create(void* data, size_t size);
+    static Ref<IndexBuffer> Create(size_t size);
 };
 
 struct FrameBufferSpecification
@@ -91,6 +93,8 @@ struct FrameBufferSpecification
     bool SwapChainTarget = false;
 };
 
+
+// let me read LearnOpenGL to finish this
 class FrameBuffer
 {
 public:
@@ -100,6 +104,19 @@ public:
     virtual void Unbind() const = 0;
 
     static Ref<FrameBuffer> Create(const FrameBufferSpecification& spec);
+};
+
+// let me read LearnOpenGL to finish this
+class UniformBuffer
+{
+public:
+    virtual ~UniformBuffer() = default;
+
+    virtual void Bind() const = 0;
+    virtual void Unbind() const = 0;
+    virtual void SetData(const void* data, size_t size, uint32_t offset = 0) = 0;
+
+    static Ref<UniformBuffer> Create(size_t size, uint32_t binding);
 };
 
 } // namespace acid

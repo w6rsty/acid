@@ -168,21 +168,21 @@ private:
 };
 
 #ifdef ACID_ENABLE_LOGGING
-    #define AC_LOG_DEBUG(...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Debug(__FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__)
-    #define AC_LOG_TRACE(...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Trace(__FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__)
-    #define AC_LOG_INFO(...)  ::acid::log::LoggerManager::Instance().GetDefaultLogger().Info(__FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__)
-    #define AC_LOG_WARN(...)  ::acid::log::LoggerManager::Instance().GetDefaultLogger().Warn(__FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__)
-    #define AC_LOG_ERROR(...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Error(__FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__)
-    #define AC_LOG_FATAL(...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Fatal(__FILE__, __PRETTY_FUNCTION__, __LINE__, __VA_ARGS__)
+    #define AC_LOG_DEBUG(...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Debug(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+    #define AC_LOG_TRACE(...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Trace(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+    #define AC_LOG_INFO(...)  ::acid::log::LoggerManager::Instance().GetDefaultLogger().Info(__FILE__,  __FUNCTION__, __LINE__, __VA_ARGS__)
+    #define AC_LOG_WARN(...)  ::acid::log::LoggerManager::Instance().GetDefaultLogger().Warn(__FILE__,  __FUNCTION__, __LINE__, __VA_ARGS__)
+    #define AC_LOG_ERROR(...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Error(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+    #define AC_LOG_FATAL(...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Fatal(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
     // Used to logging info related to last log
     #define AC_LOG_BLANK(...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Debug("^^^", "^^^", __LINE__, __VA_ARGS__)
 
-    #define AC_TAG_DEBUG(tag, ...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Debug(__FILE__, __PRETTY_FUNCTION__, __LINE__, "\x1b[32m[", tag "]\x1b[0m ", __VA_ARGS__)
-    #define AC_TAG_TRACE(tag, ...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Trace(__FILE__, __PRETTY_FUNCTION__, __LINE__, "\x1b[35m[", tag "]\x1b[0m ", __VA_ARGS__)
-    #define AC_TAG_INFO(tag, ...)  ::acid::log::LoggerManager::Instance().GetDefaultLogger().Info(__FILE__, __PRETTY_FUNCTION__, __LINE__, "\x1b[35m[", tag "]\x1b[0m ", __VA_ARGS__)
-    #define AC_TAG_WARN(tag, ...)  ::acid::log::LoggerManager::Instance().GetDefaultLogger().Warn(__FILE__, __PRETTY_FUNCTION__, __LINE__, "\x1b[35m[", tag "]\x1b[0m ", __VA_ARGS__)
-    #define AC_TAG_ERROR(tag, ...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Error(__FILE__, __PRETTY_FUNCTION__, __LINE__, "\x1b[35m[", tag "]\x1b[0m ", __VA_ARGS__)
-    #define AC_TAG_FATAL(tag, ...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Fatal(__FILE__, __PRETTY_FUNCTION__, __LINE__, "\x1b[35m[", tag "]\x1b[0m ", __VA_ARGS__)
+    #define AC_TAG_DEBUG(tag, ...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Debug(__FILE__, __FUNCTION__, __LINE__, "\x1b[32m[", tag "]\x1b[0m ", __VA_ARGS__)
+    #define AC_TAG_TRACE(tag, ...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Trace(__FILE__, __FUNCTION__, __LINE__, "\x1b[35m[", tag "]\x1b[0m ", __VA_ARGS__)
+    #define AC_TAG_INFO(tag, ...)  ::acid::log::LoggerManager::Instance().GetDefaultLogger().Info(__FILE__,  __FUNCTION__, __LINE__, "\x1b[35m[", tag "]\x1b[0m ", __VA_ARGS__)
+    #define AC_TAG_WARN(tag, ...)  ::acid::log::LoggerManager::Instance().GetDefaultLogger().Warn(__FILE__,  __FUNCTION__, __LINE__, "\x1b[35m[", tag "]\x1b[0m ", __VA_ARGS__)
+    #define AC_TAG_ERROR(tag, ...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Error(__FILE__, __FUNCTION__, __LINE__, "\x1b[35m[", tag "]\x1b[0m ", __VA_ARGS__)
+    #define AC_TAG_FATAL(tag, ...) ::acid::log::LoggerManager::Instance().GetDefaultLogger().Fatal(__FILE__, __FUNCTION__, __LINE__, "\x1b[35m[", tag "]\x1b[0m ", __VA_ARGS__)
 #else
     #define AC_LOG_DEBUG(...)
     #define AC_LOG_TRACE(...)

@@ -14,7 +14,7 @@ public:
 
     virtual void Bind() const override;
     virtual void Unbind() const override;
-    virtual void SetData(void* data, size_t size) override;
+    virtual void SetData(void* data, size_t size, size_t offset) override;
     virtual void SetLayout(const VertexBufferLayout& layout) override { layout_ = layout; }
     virtual VertexBufferLayout& GetLayout() override { return layout_; }
 private:
@@ -25,16 +25,18 @@ private:
 class OpenGLIndexBuffer final : public IndexBuffer
 {
 public:
-    OpenGLIndexBuffer(uint32_t* data, size_t count);
+    OpenGLIndexBuffer(size_t size);
+    OpenGLIndexBuffer(void* data, size_t size);
     virtual ~OpenGLIndexBuffer() override;
 
     virtual void Bind() const override;
     virtual void Unbind() const override;
+    virtual void SetData(void* data, size_t size, size_t offset) override;
 
-    virtual uint32_t GetCount() const override { return count_; }
+    virtual uint32_t GetCount() const override { return size_ / sizeof(uint32_t); }
 private:
     uint32_t rendererID_;
-    uint32_t count_;
+    uint32_t size_;
 };
 
 class OpenGLFrameBuffer final : public FrameBuffer

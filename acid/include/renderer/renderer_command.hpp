@@ -30,9 +30,14 @@ public:
         rendererAPI_->Clear();
     }
 
-    static void DrawIndexed(const Ref<VertexArray>& vertexArray)
+    static void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount)
     {
-        rendererAPI_->DrawIndexed(vertexArray);
+        rendererAPI_->DrawIndexed(vertexArray, indexCount);
+    }
+
+    static void DrawWireFrame(bool enable = true)
+    {
+        rendererAPI_->DrawWireFrame(enable);
     }
 private:
     static RendererAPI* rendererAPI_;

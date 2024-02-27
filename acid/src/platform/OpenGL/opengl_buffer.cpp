@@ -27,7 +27,6 @@ OpenGLVertexBuffer::~OpenGLVertexBuffer()
 void OpenGLVertexBuffer::Bind() const
 {
     glBindBuffer(GL_ARRAY_BUFFER, rendererID_);
-
 }
 
 void OpenGLVertexBuffer::Unbind() const
@@ -35,17 +34,26 @@ void OpenGLVertexBuffer::Unbind() const
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void OpenGLVertexBuffer::SetData(void* data, size_t size)
+void OpenGLVertexBuffer::SetData(void* data, size_t size, size_t offset)
 {
-    glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+    glBindBuffer(GL_ARRAY_BUFFER, rendererID_);
+    glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
 }
 
-OpenGLIndexBuffer::OpenGLIndexBuffer(uint32_t* data, size_t count)
-: count_(count)
+OpenGLIndexBuffer::OpenGLIndexBuffer(size_t size)
+: size_(size)
 {
     glGenBuffers(1, &rendererID_);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint32_t) * count, data, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+}
+
+OpenGLIndexBuffer::OpenGLIndexBuffer(void* data, size_t size)
+: size_(size)
+{
+    glGenBuffers(1, &rendererID_);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID_);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 }
 
 OpenGLIndexBuffer::~OpenGLIndexBuffer()
@@ -61,6 +69,12 @@ void OpenGLIndexBuffer::Bind() const
 void OpenGLIndexBuffer::Unbind() const
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void OpenGLIndexBuffer::SetData(void* data, size_t size, size_t offset)
+{
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID_);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 }
 
 OpenGLFrameBuffer::OpenGLFrameBuffer(const FrameBufferSpecification& spec)

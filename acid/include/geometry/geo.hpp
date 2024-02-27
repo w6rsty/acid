@@ -17,14 +17,10 @@ namespace acid::geo
 enum class GeoType
 {
     None,
-    Point,
-    Line,
-    // 2D
     Rect,
     Circle,
     Triangle,
     Quad,
-    // 3D
     Box,
     Sphere,
     Tetrahedron,
@@ -41,18 +37,7 @@ struct GeoData
     size_t IndexCount;
 };
 
-struct Point
-{
-    glm::vec3 Position;
-};
-
-struct Line
-{
-    glm::vec3 Start;
-    glm::vec3 End;
-};
-
-// 2D ===============
+// 3D ===============
 
 struct Rect
 {
@@ -143,8 +128,6 @@ struct Quad
     }     
 };
 
-// 3D ===============
-
 struct Box
 {
     glm::vec3 Origin;
@@ -215,6 +198,23 @@ struct Pyramid
     glm::vec3 B;
     glm::vec3 C;
     glm::vec3 D;
+
+    static GeoData UnitData()
+    {
+        return {
+            {
+                Vertex { { 0.0f,  0.5f,  0.0f}, {0.0f, 0.0f, 1.0f}, {0.5f, 1.0f} },
+                Vertex { {-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f} },
+                Vertex { { 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f} },
+                Vertex { { 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
+                Vertex { {-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f} }
+            },
+            5 * sizeof(Vertex),
+            { 0, 1, 2, 2, 3, 0, 0, 3, 4, 4, 1, 0, 1, 2, 4, 4, 3, 2 },
+            18
+        };
+    
+    }
 };
 
 struct Cuboid
@@ -254,7 +254,6 @@ struct Capsule
         std::vector<uint32_t> indices;
         vertices.reserve((precision + 1) * (precision + 1));
         indices.reserve(6 * precision * precision);
-        AC_LOG_TRACE(vertices.capacity(), " ", vertices.size());
         for (uint32_t i = 0; i <= precision; i++)
         {
             for (uint32_t j = 0; j <= precision; j++)
@@ -289,7 +288,6 @@ struct Capsule
                 indices.push_back(precision * (i + 1) + j + 1);
             }
         }
-        AC_LOG_TRACE(vertices.capacity(), " ", vertices.size());
         return {
             std::move(vertices),
             2 * (precision + 1) * (precision + 1) * sizeof(Vertex),

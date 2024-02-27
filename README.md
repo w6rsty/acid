@@ -1,9 +1,9 @@
 # Acid
-a opengl 2d/3d renderer
+a OpenGL 2D/3D renderer
 
 ## Build
 ```
-$ cmake -S . -B build -D{YOUR_PLAFORM}=ON
+$ cmake -S . -B build -D{YOUR_PLATFORM}=ON
 $ cd build
 $ cmake --build .
 ```

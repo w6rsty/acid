@@ -25,9 +25,8 @@ public:
     void Run();
 private:
     bool running_ = true;
-    Ref<VertexArray> vertexArray_;
+
     Ref<Window> window_;
-    Ref<Shader> shader_;
     Ref<SceneCamera> camera_;
 };
 

@@ -12,8 +12,9 @@ public:
     virtual void Shutdown() override;
     virtual void SetClearColor(const glm::vec4& color) override;
     virtual void Clear() override;
+    virtual void DrawWireFrame(bool enable = true) override;
 
-    virtual void DrawIndexed(const Ref<VertexArray>& vertexArray) override;
+    virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount) override;
 };
 
 } // namespace acid

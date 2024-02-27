@@ -5,8 +5,7 @@
 namespace acid
 {
 
-/// Pure static 
-class Renderer
+class Renderer2D
 {
 public:
     static void Init();
@@ -15,7 +14,8 @@ public:
     static void BeginScene(const Ref<SceneCamera>& camera);
     static void EndScene();
 
-    static void DrawCuboid(const glm::mat4& transform);
+    static void DrawQuad(const glm::mat4& transform);
+    static void DrawCircle(const glm::mat4& transform);
 };
 
 } // namespace acid

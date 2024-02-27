@@ -25,12 +25,21 @@ Ref<VertexBuffer> VertexBuffer::Create(void* vertices, size_t size)
     }
 }
 
-Ref<IndexBuffer> IndexBuffer::Create(uint32_t* data, size_t count)
+Ref<IndexBuffer> IndexBuffer::Create(void* data, size_t size)
 {
     switch (RendererAPI::GetAPI())
     {
         case RendererAPI::API::None: AC_ASSERT_MSG(false, "AcidGraphicAPI::None is not supported"); return nullptr;
-        case RendererAPI::API::OpenGL: return CreateRef<OpenGLIndexBuffer>(data, count);
+        case RendererAPI::API::OpenGL: return CreateRef<OpenGLIndexBuffer>(data, size);
+    }
+}
+
+Ref<IndexBuffer> IndexBuffer::Create(size_t size)
+{
+    switch (RendererAPI::GetAPI())
+    {
+        case RendererAPI::API::None: AC_ASSERT_MSG(false, "AcidGraphicAPI::None is not supported"); return nullptr;
+        case RendererAPI::API::OpenGL: return CreateRef<OpenGLIndexBuffer>(size);
     }
 }
 
@@ -40,6 +49,15 @@ Ref<FrameBuffer> FrameBuffer::Create(const FrameBufferSpecification& spec)
     {
         case RendererAPI::API::None: AC_ASSERT_MSG(false, "AcidGraphicAPI::None is not supported"); return nullptr;
         case RendererAPI::API::OpenGL: return CreateRef<OpenGLFrameBuffer>(spec);
+    }
+}
+
+Ref<UniformBuffer> UniformBuffer::Create(size_t size, uint32_t binding)
+{
+    switch (RendererAPI::GetAPI())
+    {
+        case RendererAPI::API::None: AC_ASSERT_MSG(false, "AcidGraphicAPI::None is not supported"); return nullptr;
+        case RendererAPI::API::OpenGL: return nullptr;
     }
 }
 
