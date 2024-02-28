@@ -6,6 +6,7 @@ aux_source_directory(./src/engine ACID_SRC_LIST)
 aux_source_directory(./src/renderer ACID_SRC_LIST)
 aux_source_directory(./src/renderer/camera ACID_SRC_LIST)
 aux_source_directory(./src/geometry ACID_SRC_LIST)
+aux_source_directory(./src/ImGui ACID_SRC_LIST)
 aux_source_directory(./src/platform/OpenGL ACID_SRC_LIST)
 
 if (ACID_PLATFORM_WINDOWS)
@@ -35,6 +36,8 @@ set(ACID_LIBS
     glad
     glm
     debugbreak
+    stb_image
+    imgui
     )
 
 target_link_libraries(acid ${ACID_LIBS})

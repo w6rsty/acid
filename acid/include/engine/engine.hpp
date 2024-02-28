@@ -8,6 +8,8 @@
 namespace acid
 {
 
+class Application;
+
 /// Driven the core functions
 class Engine
 {
@@ -16,16 +18,13 @@ public:
     ~Engine();
 
     void Init();
-
-    void OnAttach();
-    void OnDetach();
-
     void Run();
 private:
     bool running_ = true;
 
-    Ref<Window> window_;
     Ref<SceneCamera> camera_;
+
+    friend class Application;
 };
 
 } // namespace acid

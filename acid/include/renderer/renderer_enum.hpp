@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "glad/glad.h"
+
 namespace acid
 {
 
@@ -47,6 +49,24 @@ static uint32_t VertexDataTypeCount(VertexDataType type)
         case VertexDataType::Float4:    return 4;
         case VertexDataType::Mat3:      return 3 * 3;
         case VertexDataType::Mat4:      return 4 * 4;
+    }
+}
+
+enum class AC_TEXTURE_WARP_MODE
+{
+    REPEAT = 0,
+    MIRRORED_REPEAT,
+    CLAMP_TO_EDGE,
+    CLAMP_TO_BORDER,
+};
+
+static GLenum AC_TEXTURE_WARP_MODE_TO_GL(AC_TEXTURE_WARP_MODE mode)
+{
+    switch (mode) {
+        case AC_TEXTURE_WARP_MODE::REPEAT: return GL_REPEAT;
+        case AC_TEXTURE_WARP_MODE::MIRRORED_REPEAT: return GL_MIRRORED_REPEAT;
+        case AC_TEXTURE_WARP_MODE::CLAMP_TO_EDGE: return GL_CLAMP_TO_EDGE;
+        case AC_TEXTURE_WARP_MODE::CLAMP_TO_BORDER: return GL_CLAMP_TO_BORDER;
     }
 }
 

@@ -17,3 +17,4 @@
 #include "renderer/camera/scene_camera.hpp"
 
 #include "engine/engine.hpp"
+#include "engine/application.hpp"

@@ -3,10 +3,8 @@
 using namespace acid;
 
 int main(int argc, char *argv[])
-{
-    Engine engine;
-
-    engine.Run();
-        
+{   
+    Application app;
+    app.Run();
     return 0;
 }
