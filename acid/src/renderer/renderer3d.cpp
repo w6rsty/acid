@@ -100,28 +100,28 @@ void Renderer3D::EndScene()
     Flush();
 }
 
-void Renderer3D::DrawQuad(const glm::vec4& color, const glm::mat4& transform)
+void Renderer3D::DrawQuad(const glm::mat4& transform, const glm::vec4& color)
 {
     DrawSimpleGeo(geo::Quad::Data, color, transform);
 }
 
-void Renderer3D::DrawTriangle(const glm::vec4& color, const glm::mat4& transform)
+void Renderer3D::DrawTriangle(const glm::mat4& transform, const glm::vec4& color)
 {
     DrawSimpleGeo(geo::Triangle::Data, color, transform);
 }
 
 /// Cost a lot of time. Avoid using it.
-void Renderer3D::DrawCircle(const glm::vec4& color, const glm::mat4& transform)
+void Renderer3D::DrawCircle(const glm::mat4& transform, const glm::vec4& color)
 {
     DrawSimpleGeo(geo::Circle::Data, color, transform);
 }
 
-void Renderer3D::DrawCuboid(const glm::vec4& color, const glm::mat4& transform)
+void Renderer3D::DrawCuboid(const glm::mat4& transform, const glm::vec4& color)
 {
     DrawSimpleGeo(geo::Cuboid::Data, color, transform);
 }
 
-void Renderer3D::DrawPyramid(const glm::vec4& color, const glm::mat4& transform)
+void Renderer3D::DrawPyramid(const glm::mat4& transform, const glm::vec4& color)
 {
     DrawSimpleGeo(geo::Pyramid::Data, color, transform);
 }

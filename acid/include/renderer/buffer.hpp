@@ -102,6 +102,8 @@ public:
 
     virtual void Bind() const = 0;
     virtual void Unbind() const = 0;
+    virtual uint32_t GetColorAttachmentID() const = 0;
+    virtual uint32_t GetDepthAttachmentID() const = 0;
 
     static Ref<FrameBuffer> Create(const FrameBufferSpecification& spec);
 };

@@ -8,16 +8,7 @@
 namespace acid
 {
 
-// Ref<Texture> Shader::Create(const std::string& filename)
-// {
-//     switch (RendererAPI::GetAPI())
-//     {
-//         case RendererAPI::API::None: AC_ASSERT_MSG(false, "AcidGraphicAPI::None is not supported"); return nullptr;
-//         case RendererAPI::API::OpenGL: return CreateRef<OpenGLShader>(filename);
-//     }
-// }
-
-Ref<Texture> Create(uint32_t width, uint32_t height, AC_TEXTURE_WARP_MODE mode)
+Ref<Texture> Texture2D::Create(uint32_t width, uint32_t height, AC_TEXTURE_WARP_MODE mode)
 {
     switch (RendererAPI::GetAPI())
     {
@@ -26,7 +17,7 @@ Ref<Texture> Create(uint32_t width, uint32_t height, AC_TEXTURE_WARP_MODE mode)
     }
 }
 
-Ref<Texture> Create(const std::string& path, AC_TEXTURE_WARP_MODE mode)
+Ref<Texture> Texture2D::Create(const std::string& path, AC_TEXTURE_WARP_MODE mode)
 {
     switch (RendererAPI::GetAPI())
     {

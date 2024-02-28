@@ -33,5 +33,10 @@ in vec2 v_TexCoord;
 
 void main()
 {   
-    color = v_Color;
+    vec3 lightDir = normalize(vec3(0.0, 0.0, 1.0));
+    float diff = max(dot(v_Normal, lightDir), 0.0);
+    vec4 diffuse = diff * v_Color;
+    color = diffuse;
+
+    // color = v_Color;
 }

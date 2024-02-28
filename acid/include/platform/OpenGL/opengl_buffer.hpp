@@ -47,8 +47,14 @@ public:
 
     virtual void Bind() const override;
     virtual void Unbind() const override;
+    virtual uint32_t GetColorAttachmentID() const override { return colorAttachment_; }
+    virtual uint32_t GetDepthAttachmentID() const override { return depthAttachment_; }
+    
 private:
     uint32_t rendererID_;
+    FrameBufferSpecification spec_;
+    uint32_t colorAttachment_;
+    uint32_t depthAttachment_;
 };
  
 } // namespace acid

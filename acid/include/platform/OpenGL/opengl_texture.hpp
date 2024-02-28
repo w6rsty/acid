@@ -19,6 +19,7 @@ public:
     virtual void Unbind() const override;
 
     virtual void SetData(void* data, uint32_t size) override;
+    virtual uint32_t GetRendererID() const override { return rendererID_; }
 
     virtual bool operator==(const Texture& other) const override
     {
