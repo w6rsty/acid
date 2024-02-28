@@ -46,12 +46,15 @@ struct Renderer2DData
         { 1.0f, 1.0f },
         { 0.0f, 1.0f }
     };
+
+    RendererStats Stats;
 };
 
 static Renderer2DData sData;
 
 void Renderer2D::Init()
 {
+    sData.Stats = {};
     sData.QuadVertexArray = VertexArray::Create();
     sData.QuadVertexArray->Bind();
 
@@ -89,7 +92,7 @@ void Renderer2D::Init()
 
 void Renderer2D::Shutdown()
 {
-
+    delete[] sData.QuadVertexBufferBase;
 }
 
 void Renderer2D::BeginScene(const Ref<SceneCamera> &camera)
@@ -102,12 +105,21 @@ void Renderer2D::BeginScene(const Ref<SceneCamera> &camera)
     sData.QuadIndexCount = 0;
 }
 
-void Renderer2D::EndScene()
+void Renderer2D::Flush()
 {
+    if (sData.QuadIndexCount == 0) return;
+
     uint32_t dataSize = (uint8_t*)sData.QuadVertexBufferPtr - (uint8_t*)sData.QuadVertexBufferBase;
     sData.QuadVertexBuffer->SetData(sData.QuadVertexBufferBase, dataSize);
 
     RendererCommand::DrawIndexed(sData.QuadVertexArray, sData.QuadIndexCount);
+    sData.Stats.DrawCalls++;
+}
+
+void Renderer2D::EndScene()
+{
+    Flush();
+    sData.Stats.Reset();
 }
 
 void Renderer2D::DrawQuad(const glm::mat4 &transform)
@@ -121,6 +133,13 @@ void Renderer2D::DrawQuad(const glm::mat4 &transform)
     }
 
     sData.QuadIndexCount += 6;
+    sData.Stats.VertexCount += 4;
+    sData.Stats.TriangleCount += 2;
+}
+
+const RendererStats &Renderer2D::GetStats()
+{
+    return sData.Stats;
 }
 
 } // namespace

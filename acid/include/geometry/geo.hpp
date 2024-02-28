@@ -2,11 +2,10 @@
 
 #include "core/base.hpp"
 #include "core/assert.hpp"
-#include "glm/geometric.hpp"
-#include "glm/gtc/constants.hpp"
 #include "renderer/vertex.hpp"
 
 #include "glm/glm.hpp"
+#include "glm/gtc/constants.hpp"
 
 #include <utility>
 #include <vector>
@@ -40,10 +39,10 @@ struct Quad
     {
         return {
             {
-               Vertex { {-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f} },
-               Vertex { { 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f} },
-               Vertex { { 0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
-               Vertex { {-0.5f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f} }
+               Vertex { .Position{-0.5f, -0.5f, 0.0f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.0f, 0.0f} },
+               Vertex { .Position{ 0.5f, -0.5f, 0.0f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{1.0f, 0.0f} },
+               Vertex { .Position{ 0.5f,  0.5f, 0.0f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{1.0f, 1.0f} },
+               Vertex { .Position{-0.5f,  0.5f, 0.0f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.0f, 1.0f} }
             },
             { 0, 1, 2, 2, 3, 0 },
         };
@@ -58,9 +57,9 @@ struct Triangle
     {
         return {
             {
-                Vertex { {-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f} },
-                Vertex { { 0.5f, -0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f} },
-                Vertex { { 0.0f,  0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.5f, 1.0f} }
+                Vertex { .Position{-0.5f, -0.5f, 0.0f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.0f, 0.0f} },
+                Vertex { .Position{ 0.5f, -0.5f, 0.0f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{1.0f, 0.0f} },
+                Vertex { .Position{ 0.0f,  0.5f, 0.0f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.5f, 1.0f} }
             },
             { 0, 1, 2 },
         };
@@ -77,7 +76,7 @@ struct Circle
         std::vector<uint32_t> indices;
         vertices.reserve(3 * (precision + 1) + 1);
         indices.reserve(3 * precision + 1);
-        vertices.push_back({ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.5f, 0.5f } });
+        vertices.push_back({ { 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, {1.0f, 0.0f, 1.0f, 1.0f}, { 0.5f, 0.5f } });
         for (uint32_t i = 0; i <= precision; i++)
         {
             Vertex vertex;
@@ -111,14 +110,14 @@ struct Cuboid
     {
         return {
             {
-                Vertex { {-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 0.0f} },
-                Vertex { { 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 0.0f} },
-                Vertex { { 0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {1.0f, 1.0f} },
-                Vertex { {-0.5f,  0.5f, -0.5f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f} },
-                Vertex { {-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 0.0f} },
-                Vertex { { 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 0.0f} },
-                Vertex { { 0.5f,  0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {1.0f, 1.0f} },
-                Vertex { {-0.5f,  0.5f,  0.5f}, {0.0f, 0.0f,  1.0f}, {0.0f, 1.0f} }
+                Vertex { .Position{-0.5f, -0.5f, -0.5f}, .Normal{0.0f, 0.0f, -1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.0f, 0.0f} },
+                Vertex { .Position{ 0.5f, -0.5f, -0.5f}, .Normal{0.0f, 0.0f, -1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{1.0f, 0.0f} },
+                Vertex { .Position{ 0.5f,  0.5f, -0.5f}, .Normal{0.0f, 0.0f, -1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{1.0f, 1.0f} },
+                Vertex { .Position{-0.5f,  0.5f, -0.5f}, .Normal{0.0f, 0.0f, -1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.0f, 1.0f} },
+                Vertex { .Position{-0.5f, -0.5f,  0.5f}, .Normal{0.0f, 0.0f,  1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.0f, 0.0f} },
+                Vertex { .Position{ 0.5f, -0.5f,  0.5f}, .Normal{0.0f, 0.0f,  1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{1.0f, 0.0f} },
+                Vertex { .Position{ 0.5f,  0.5f,  0.5f}, .Normal{0.0f, 0.0f,  1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{1.0f, 1.0f} },
+                Vertex { .Position{-0.5f,  0.5f,  0.5f}, .Normal{0.0f, 0.0f,  1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.0f, 1.0f} }
             },
             { 0, 1, 2, 2, 3, 0, 1, 5, 6, 6, 2, 1, 5, 4, 7, 7, 6, 5, 4, 0, 3, 3, 7, 4, 3, 2, 6, 6, 7, 3, 0, 4, 5, 5, 1, 0 },
         };
@@ -133,11 +132,11 @@ struct Pyramid
     {
         return {
             {
-                Vertex { { 0.0f,  0.5f,  0.0f}, {0.0f, 0.0f, 1.0f}, {0.5f, 1.0f} },
-                Vertex { {-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f} },
-                Vertex { { 0.5f, -0.5f, -0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f} },
-                Vertex { { 0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f} },
-                Vertex { {-0.5f, -0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f} }
+                Vertex { .Position{ 0.0f,  0.5f,  0.0f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.5f, 1.0f} },
+                Vertex { .Position{-0.5f, -0.5f, -0.5f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.0f, 0.0f} },
+                Vertex { .Position{ 0.5f, -0.5f, -0.5f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{1.0f, 0.0f} },
+                Vertex { .Position{ 0.5f, -0.5f,  0.5f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{1.0f, 1.0f} },
+                Vertex { .Position{-0.5f, -0.5f,  0.5f}, .Normal{0.0f, 0.0f, 1.0f}, .Color{1.0f, 0.0f, 1.0f, 1.0f}, .TexCoord{0.0f, 1.0f} }
             },
             { 0, 1, 2, 2, 3, 0, 0, 3, 4, 4, 1, 0, 1, 2, 4, 4, 3, 2 },
         };
@@ -154,7 +153,7 @@ struct Cone
         std::vector<uint32_t> indices;
         vertices.reserve((precision + 1) * 2);
         indices.reserve(3 * precision);
-        vertices.push_back({ { 0.0f, 0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.5f, 0.5f } });
+        vertices.push_back({ { 0.0f, 0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f }, {1.0f, 0.0f, 1.0f, 1.0f}, { 0.5f, 0.5f } });
         for (uint32_t i = 0; i <= precision; i++)
         {
             Vertex vertex;
