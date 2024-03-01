@@ -28,13 +28,8 @@ void Engine::Init()
 {
     scene_ = CreateRef<Scene>();
 
-    camera_ = CreateRef<SceneCamera>();
-    camera_->SetOrthographic(1280.0f / 720.0f, 2.0f, -20.0f, 20.0f);
-    camera_->SetPerspective(1280.0f / 720.0f, 30.0f, 0.01f, 1000.0f);
-    camera_->SetPosition({0.0f, 5.0f, 10.0f});
-    camera_->SetRotation({-15.0f, 0.0f, 0.0f});
-    cameraPos_ = camera_->GetPosition();
-    cameraRot_ = camera_->GetRotation();
+    cameraPos_ = scene_->GetCamera()->GetPosition();
+    cameraRot_ = scene_->GetCamera()->GetRotation();
 }
 
 void Engine::Run()
@@ -42,7 +37,7 @@ void Engine::Run()
     RendererCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
     RendererCommand::Clear();
 
-    Renderer3D::BeginScene(camera_);
+    Renderer3D::BeginScene(scene_->GetCamera());
 
     scene_->OnUpdate();
 
@@ -60,18 +55,18 @@ void Engine::Run()
     ImGui::Separator();
     if (ImGui::DragFloat3("Camera Position", glm::value_ptr(cameraPos_), 0.1f))
     {
-        camera_->SetPosition(cameraPos_);
+        scene_->GetCamera()->SetPosition(cameraPos_);
     }
 
     if (ImGui::DragFloat3("Camera Rotation", glm::value_ptr(cameraRot_), 0.1f))
     {
-        camera_->SetRotation(cameraRot_);
+        scene_->GetCamera()->SetRotation(cameraRot_);
     }
 
     ProjectionType type[2] = {ProjectionType::Perspective, ProjectionType::Orthographic};
 
     if (ImGui::Combo("Projection Type", &projectionTypeIndex_, "Perspective\0Orthographic\0"))
-        camera_->SetProjectionType(type[projectionTypeIndex_]);
+        scene_->GetCamera()->SetProjectionType(type[projectionTypeIndex_]);
 
     ImGui::End();
 }

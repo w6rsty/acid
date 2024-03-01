@@ -2,6 +2,7 @@
 
 #include "core/log.hpp"
 #include "glm/ext/matrix_transform.hpp"
+#include "glm/fwd.hpp"
 #include "renderer/camera/scene_camera.hpp"
 #include "renderer/renderer_enum.hpp"
 #include "renderer/shader.hpp"
@@ -40,7 +41,8 @@ struct RendererData
     RendererStats Stats;
 
     std::array<Ref<Texture>, MaxTextureSlots> TextureSlots;
-    uint32_t TextureSlotIndex = 1;
+    // reserve for blank and bulb
+    uint32_t TextureSlotIndex = 2;
 
     const glm::vec3 CubeVertices[8] = {
         { -0.125f, -0.125f, -0.125f },
@@ -142,9 +144,12 @@ void Renderer3D::Init()
     delete[] indices;
 
     sData.TextureSlots[0] = Texture2D::Create(1, 1);
-    uint32_t whiteTextureData = 0xffffffff;
-    sData.TextureSlots[0]->SetData(&whiteTextureData, sizeof(uint32_t));
+    uint32_t blankTex = 0xffffffff;
+    sData.TextureSlots[0]->SetData(&blankTex, sizeof(uint32_t));
     sData.TextureSlots[0]->Bind(0);
+
+    sData.TextureSlots[1] = Texture2D::Create("assets/textures/bulb.png");
+    sData.TextureSlots[1]->Bind(1);
 
     int samplers[sData.MaxTextureSlots];
     for (uint32_t i = 0; i < sData.MaxTextureSlots; i++)
@@ -197,16 +202,6 @@ void Renderer3D::BeginScene(const Ref<SceneCamera>& camera)
     sData.BatchShader->SetUniformMat4("u_View", camera->GetViewMatrix());
 
     sData.BatchShader->SetUniformFloat3("u_CamPos", camera->GetPosition());
-
-    sData.BatchShader->SetUniformFloat3("u_Light.Position", { 0.0f, 3.0f, 0.0f });
-    sData.BatchShader->SetUniformFloat3("u_Light.Direction", { -1.0f, -1.0f, 0.0f });
-    sData.BatchShader->SetUniformFloat3("u_Light.Ambient", { 0.1f, 0.1f, 0.1f });
-    sData.BatchShader->SetUniformFloat("u_Light.AmbientIntensity", 0.1f);
-    sData.BatchShader->SetUniformFloat3("u_Light.Diffuse", { 0.4f, 0.4f, 0.4f });
-    sData.BatchShader->SetUniformFloat("u_Light.DiffuseIntensity", 0.8f);
-    sData.BatchShader->SetUniformFloat3("u_Light.Specular", { 0.5f, 0.5f, 0.5f });
-    sData.BatchShader->SetUniformFloat("u_Light.SpecularIntensity", 0.5f);
-    sData.BatchShader->SetUniformFloat("u_Light.Shininess", 4.0f);
 
     sData.Camera = camera;
 
@@ -287,6 +282,51 @@ void Renderer3D::DrawSprite(const glm::mat4& transform, const Ref<Texture>& text
     sData.Stats.VoxelCount++;
 }
 
+void Renderer3D::DrawLight(const glm::vec3& position, Light& light, uint32_t index)
+{
+    if (sData.IndexCount >= RendererData::MaxIndices)
+    {
+        NextBatch();
+    }
+
+    light.Position = position;
+    SetLightUniforms(light, index);
+
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
+
+    for (uint32_t i = 0; i < 8; i++)
+    {
+        glm::vec3 Pos = transform * glm::vec4(sData.CubeVertices[i], 1.0);
+        sData.BatchVertexBufferPtr->Position = Pos;
+        sData.BatchVertexBufferPtr->Color = glm::vec4(1.0f);
+        sData.BatchVertexBufferPtr->TexCoord = sData.TexCoords[i];
+        sData.BatchVertexBufferPtr->Normal = Pos;
+        sData.BatchVertexBufferPtr->TexIndex = 1.0f;
+        sData.BatchVertexBufferPtr++;
+    }
+
+    sData.IndexCount += 36;
+
+    sData.Stats.VertexCount += 8;
+    sData.Stats.TriangleCount += 12;
+    sData.Stats.VoxelCount++;
+}
+
+void Renderer3D::SetLightUniforms(const Light& light, uint32_t index)
+{
+    sData.BatchShader->Bind();
+    sData.BatchShader->SetUniformFloat3("u_Lights[" + std::to_string(index) + "].Position", light.Position);
+
+    sData.BatchShader->SetUniformFloat3("u_Lights[" + std::to_string(index) + "].Ambient", light.Ambient);
+    sData.BatchShader->SetUniformFloat("u_Lights[" + std::to_string(index) + "].AmbientIntensity", light.AmbientIntensity);
+
+    sData.BatchShader->SetUniformFloat3("u_Lights[" + std::to_string(index) + "].Diffuse", light.Diffuse);
+    sData.BatchShader->SetUniformFloat("u_Lights[" + std::to_string(index) + "].DiffuseIntensity", light.DiffuseIntensity);
+
+    sData.BatchShader->SetUniformFloat3("u_Lights[" + std::to_string(index) + "].Specular", light.Specular);
+    sData.BatchShader->SetUniformFloat("u_Lights[" + std::to_string(index) + "].SpecularIntensity", light.SpecularIntensity);
+    sData.BatchShader->SetUniformFloat("u_Lights[" + std::to_string(index) + "].Shininess", light.Shininess);
+}
 
 const RendererStats& Renderer3D::GetStats()
 {

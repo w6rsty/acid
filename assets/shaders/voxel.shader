@@ -40,7 +40,6 @@ uniform sampler2D u_Textures[16];
 struct Light
 {
     vec3 Position;
-    vec3 Direction;
 
     vec3 Ambient;
     float AmbientIntensity;
@@ -54,7 +53,32 @@ struct Light
 };
 
 uniform vec3 u_CamPos;
-uniform Light u_Light;
+
+#define MAX_POINT_LIGHTS 5
+uniform Light u_Lights[MAX_POINT_LIGHTS];
+
+vec3 CalcSpotLight(vec3 normal, Light light, vec3 viewPos, vec3 pos)
+{
+    float constant = 1.0;
+    float linear = 0.09;
+    float quadratic = 0.032;
+
+    vec3 lightDir = normalize(light.Position - pos);
+    float distance = length(light.Position - pos);
+    float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
+
+    vec3 ambient = light.Ambient * light.AmbientIntensity;
+    vec3 norm = normalize(normal);
+    float diff = max(dot(norm, lightDir), 0.0);
+    vec3 diffuse = light.Diffuse * (diff * light.DiffuseIntensity * attenuation);
+
+    vec3 viewDir = normalize(viewPos - pos);
+    vec3 reflectDir = reflect(-lightDir, norm);
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), light.Shininess);
+    vec3 specular = light.Specular * (spec * light.SpecularIntensity * attenuation);
+
+    return ambient + diffuse + specular;
+}
 
 void main()
 {   
@@ -62,26 +86,11 @@ void main()
     if (texColor.a < 0.1)
         discard;
 
-    vec3 sky = vec3(0.3, 0.3, 0.3);
+    vec3 result = vec3(0.0);
+    for (int i = 0; i < MAX_POINT_LIGHTS; i++)
+    {
+        result += CalcSpotLight(v_Normal, u_Lights[i], u_CamPos, v_Position);
+    }
 
-    float constant = 1.0;
-    float linear = 0.09;
-    float quadratic = 0.032;
-
-    vec3 lightDir = normalize(u_Light.Position - v_Position);
-    float distance = length(u_Light.Position - v_Position);
-    float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
-
-    vec3 ambient = u_Light.Ambient * u_Light.AmbientIntensity;
-    vec3 norm = normalize(v_Normal);
-    float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = u_Light.Diffuse * (diff * u_Light.DiffuseIntensity * attenuation);
-
-    vec3 viewDir = normalize(u_CamPos - v_Position);
-    vec3 reflectDir = reflect(-lightDir, norm);
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), u_Light.Shininess);
-    vec3 specular = u_Light.Specular * (spec * u_Light.SpecularIntensity * attenuation);
-
-    vec3 result = (ambient + diffuse + specular + sky) * vec3(texColor) * vec3(v_Color);
-    color = vec4(result, 1.0);
+    color = vec4(result * texColor.rgb * v_Color.rgb, 1.0);
 }

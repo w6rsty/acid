@@ -24,7 +24,7 @@ public:
 private:
     bool running_ = true;
 
-    Ref<SceneCamera> camera_;
+    // debug
     glm::vec3 cameraPos_ = {0.0f, 0.0f, 0.0f};
     glm::vec3 cameraRot_ = {0.0f, 0.0f, 0.0f};
     ProjectionType projectionType_ = ProjectionType::Perspective;
