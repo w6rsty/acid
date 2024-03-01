@@ -26,6 +26,7 @@ constexpr Scope<T> CreateScope(Args&&... args)
 struct RendererStats
 {
     uint32_t DrawCalls = 0;
+    uint32_t VoxelCount = 0;
     uint32_t VertexCount = 0;
     uint32_t TriangleCount = 0;
 
@@ -37,6 +38,7 @@ struct RendererStats
         DrawCalls = 0;
         VertexCount = 0;
         TriangleCount = 0;
+        VoxelCount = 0;
     }
 };
 

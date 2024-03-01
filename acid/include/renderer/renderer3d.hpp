@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer/camera/scene_camera.hpp"
+#include "renderer/texture.hpp"
 
 namespace acid
 {
@@ -9,10 +10,6 @@ namespace geo
 {
     struct GeoData;
 }
-
-/// Benchmark
-// 10000    cubes | 4096 | 210fps   | 20 drawcalls
-// 10000    cubes | 8192 | 355fps   | 10 drawcalls
 
 class Renderer3D
 {
@@ -24,17 +21,10 @@ public:
     static void EndScene();
     static void Flush();
 
-    static void DrawQuad(const glm::mat4& transform = glm::mat4(1.0f), const glm::vec4& color = glm::vec4(1.0f));
-    static void DrawTriangle(const glm::mat4& transform = glm::mat4(1.0f), const glm::vec4& color = glm::vec4(1.0f));
-    static void DrawCuboid(const glm::mat4& transform = glm::mat4(1.0f), const glm::vec4& color = glm::vec4(1.0f));
-    static void DrawPyramid(const glm::mat4& transform = glm::mat4(1.0f), const glm::vec4& color = glm::vec4(1.0f));
-    // avoid using it
-    static void DrawCircle(const glm::mat4& transform = glm::mat4(1.0f), const glm::vec4& color = glm::vec4(1.0f));
-
+    static void DrawVoxel(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f));
+    static void DrawSprite(const glm::mat4& transform, const Ref<Texture>& texture, const glm::vec4& color = glm::vec4(1.0f));
     static const RendererStats& GetStats();
 private:
-    static void DrawSimpleGeo(const geo::GeoData& drawInfo, const glm::vec4& color, const glm::mat4& transform);
-
     static void StartBatch();
     static void NextBatch();
 };

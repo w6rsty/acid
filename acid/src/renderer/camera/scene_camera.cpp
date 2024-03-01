@@ -116,4 +116,10 @@ const glm::mat4& SceneCamera::GetViewProjectionMatrix()
     return viewProjection_;
 }
 
+glm::mat4 SceneCamera::GetRotationMatrix()
+{
+    glm::quat rotationQuat = glm::quat(glm::radians(rotation_));
+    return glm::mat4_cast(rotationQuat);
+}
+
 } // namespace acid

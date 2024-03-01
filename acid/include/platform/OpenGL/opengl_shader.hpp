@@ -23,6 +23,7 @@ public:
     virtual void Unbind() const override;
 
     virtual void SetUniformInt(const std::string& name, const int value) override;
+    virtual void SetUniformIntArray(const std::string& name, int* values, uint32_t count) override;
     virtual void SetUniformFloat(const std::string& name, const float value) override;
     virtual void SetUniformFloat2(const std::string& name, const glm::vec2& value) override;
     virtual void SetUniformFloat3(const std::string& name, const glm::vec3& value) override;
@@ -35,6 +36,7 @@ private:
     void CompileShader(const std::unordered_map<GLenum, std::string>& shaderSources);
 
     virtual void UploadUniformInt(const std::string& name, const int value) override;
+    virtual void UploadUniformIntArray(const std::string& name, int* values, uint32_t count) override;
     virtual void UploadUniformFloat(const std::string& name, const float value) override;
     virtual void UploadUniformFloat2(const std::string& name, const glm::vec2& value) override;
     virtual void UploadUniformFloat3(const std::string& name, const glm::vec3& value) override;
