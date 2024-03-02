@@ -19,13 +19,18 @@ public:
 
     static void DrawVoxel(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f));
     static void DrawSprite(const glm::mat4& transform, const Ref<Texture>& texture, const glm::vec4& color = glm::vec4(1.0f));
-    static void DrawLight(const glm::vec3& position, Light& Light, uint32_t index);
+    static void DrawPointLight(const glm::vec3& position, PointLight& Light, uint32_t index);
+    static void DrawSpotLight(const glm::vec3& position, SpotLight& Light);
+    static void SetGlobalLight(const DirLight& light);
+    static void SetGamma(float* gamma);
     static const RendererStats& GetStats();
 private:
     static void StartBatch();
     static void NextBatch();
 
-    static void SetLightUniforms(const Light& light, uint32_t index);
+    static void SetPointLightUniforms(const PointLight& light, uint32_t index);
+    static void SetSpotLightUniforms(const SpotLight& light);
+    static void SetDirLightUniforms(const DirLight& light);
 };
 
 } // namespace acid

@@ -5,19 +5,44 @@
 namespace acid
 {
 
-struct Light
+struct PointLight
 {
     glm::vec3 Position;
 
-    glm::vec3 Ambient;
-    float AmbientIntensity;
-    
-    glm::vec3 Diffuse;
-    float DiffuseIntensity;
+    float Constant;
+    float Linear;
+    float Quadratic;
 
+    glm::vec3 Ambient;
+    glm::vec3 Diffuse;
     glm::vec3 Specular;
-    float SpecularIntensity;
-    float Shininess;
+};
+
+
+struct DirLight
+{
+    glm::vec3 Direction;
+
+    glm::vec3 Ambient;
+    glm::vec3 Diffuse;
+    glm::vec3 Specular;
+};
+
+struct SpotLight
+{
+    glm::vec3 Position;
+    glm::vec3 Direction;
+
+    float CutOff;
+    float OuterCutOff;
+
+    float Constant;
+    float Linear;
+    float Quadratic;
+
+    glm::vec3 Ambient;
+    glm::vec3 Diffuse;
+    glm::vec3 Specular;
 };
 
 } // namespace acid

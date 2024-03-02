@@ -26,6 +26,16 @@ static GLenum ShaderTypeStrToGLeum(const std::string& type)
     }
 }
 
+static std::string ShaderTypeGLeumToStr(const GLenum type)
+{
+    if (type == GL_VERTEX_SHADER) return "vertex";
+    else if (type == GL_FRAGMENT_SHADER) return "fragment";
+    else {
+        AC_TAG_WARN("Shader", "Unsupport shader type: {", type, "}");
+        return "";
+    }
+}
+
 OpenGLShader::OpenGLShader(const std::string& filename)
 {
     std::string content = ReadFile(filename);
@@ -129,7 +139,7 @@ void OpenGLShader::CompileShader(const std::unordered_map<GLenum, std::string>& 
 
             glDeleteShader(shader);
             glDeleteProgram(program);
-            AC_ASSERT_MSG(false, "Shader compilation failed: \n", infoLog.data());
+            AC_ASSERT_MSG(false, ShaderTypeGLeumToStr(ts.first), " shader compilation failed: \n", infoLog.data());
         }
         glAttachShader(program, shader);
         shaderIDs[shaderIndex++] = shader;

@@ -29,6 +29,7 @@ struct RendererStats
     uint32_t VoxelCount = 0;
     uint32_t VertexCount = 0;
     uint32_t TriangleCount = 0;
+    uint32_t LightCount = 0;
 
     uint32_t GetTotalVertexCount() const { return VertexCount; }
     uint32_t GetTotalTriangleCount() const { return TriangleCount; }
@@ -39,6 +40,7 @@ struct RendererStats
         VertexCount = 0;
         TriangleCount = 0;
         VoxelCount = 0;
+        LightCount = 0;
     }
 };
 

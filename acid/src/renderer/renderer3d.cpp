@@ -1,13 +1,14 @@
 #include "renderer/renderer3d.hpp"
 
 #include "core/log.hpp"
-#include "glm/ext/matrix_transform.hpp"
-#include "glm/fwd.hpp"
-#include "renderer/camera/scene_camera.hpp"
-#include "renderer/renderer_enum.hpp"
+#include "geometry/cuboid.hpp"
 #include "renderer/shader.hpp"
+#include "renderer/renderer_enum.hpp"
 #include "renderer/vertex_array.hpp"
 #include "renderer/renderer_command.hpp"
+#include "renderer/camera/scene_camera.hpp"
+
+#include "glm/ext/matrix_transform.hpp"
 
 #include <array>
 
@@ -26,7 +27,7 @@ struct Vertex
 struct RendererData
 {
     static const uint32_t MaxVoxels = 1024;
-    static const uint32_t MaxVertices = MaxVoxels * 8;
+    static const uint32_t MaxVertices = MaxVoxels * 24;
     static const uint32_t MaxIndices = MaxVoxels * 36;
     static const uint32_t MaxTextureSlots = 16;
 
@@ -41,31 +42,10 @@ struct RendererData
     RendererStats Stats;
 
     std::array<Ref<Texture>, MaxTextureSlots> TextureSlots;
-    // reserve for blank and bulb
-    uint32_t TextureSlotIndex = 2;
+    // reserve for blank, bulb, flashlight
+    uint32_t TextureSlotIndex = 3;
 
-    const glm::vec3 CubeVertices[8] = {
-        { -0.125f, -0.125f, -0.125f },
-        {  0.125f, -0.125f, -0.125f },
-        {  0.125f,  0.125f, -0.125f },
-        { -0.125f,  0.125f, -0.125f },
-        { -0.125f, -0.125f,  0.125f },
-        {  0.125f, -0.125f,  0.125f },
-        {  0.125f,  0.125f,  0.125f },
-        { -0.125f,  0.125f,  0.125f }
-    };
-
-    const glm::vec2 TexCoords[8] {
-        { 0.0f, 0.0f },
-        { 1.0f, 0.0f },
-        { 1.0f, 1.0f },
-        { 0.0f, 1.0f },
-
-        { 1.0f, 0.0f },
-        { 0.0f, 0.0f },
-        { 0.0f, 1.0f },
-        { 1.0f, 1.0f },
-    };
+    float* Gamma = nullptr;
 
     Ref<SceneCamera> Camera = nullptr;
 };
@@ -91,52 +71,15 @@ void Renderer3D::Init()
   
     uint32_t* indices = new uint32_t[RendererData::MaxIndices];
     uint32_t offset = 0;
-    for (uint32_t i = 0; i < RendererData::MaxIndices; i += 36)
+    for (uint32_t i = 0; i < RendererData::MaxIndices; i += 6)
     {
-        // front
-        indices[i +  0] = offset + 0;
-        indices[i +  1] = offset + 1;
-        indices[i +  2] = offset + 2;
-        indices[i +  3] = offset + 2;
-        indices[i +  4] = offset + 3;
-        indices[i +  5] = offset + 0;
-        // back
-        indices[i +  6] = offset + 5;
-        indices[i +  7] = offset + 4;
-        indices[i +  8] = offset + 7;
-        indices[i +  9] = offset + 7;
-        indices[i + 10] = offset + 6;
-        indices[i + 11] = offset + 5;
-        // left
-        indices[i + 12] = offset + 4;
-        indices[i + 13] = offset + 0;
-        indices[i + 14] = offset + 3;
-        indices[i + 15] = offset + 3;
-        indices[i + 16] = offset + 7;
-        indices[i + 17] = offset + 4;
-        // right
-        indices[i + 18] = offset + 1;
-        indices[i + 19] = offset + 5;
-        indices[i + 20] = offset + 6;
-        indices[i + 21] = offset + 6;
-        indices[i + 22] = offset + 2;
-        indices[i + 23] = offset + 1;
-        // top
-        indices[i + 24] = offset + 3;
-        indices[i + 25] = offset + 2;
-        indices[i + 26] = offset + 6;
-        indices[i + 27] = offset + 6;
-        indices[i + 28] = offset + 7;
-        indices[i + 29] = offset + 3;
-        // bottom
-        indices[i + 30] = offset + 1;
-        indices[i + 31] = offset + 0;
-        indices[i + 32] = offset + 4;
-        indices[i + 33] = offset + 4;
-        indices[i + 34] = offset + 5;
-        indices[i + 35] = offset + 1;
-
-        offset += 8;
+        indices[i + 0] = offset + 0;
+        indices[i + 1] = offset + 1;
+        indices[i + 2] = offset + 2;
+        indices[i + 3] = offset + 2;
+        indices[i + 4] = offset + 3;
+        indices[i + 5] = offset + 0;
+        offset += 4;
     }
     
     Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices, RendererData::MaxIndices * sizeof(uint32_t));
@@ -150,6 +93,9 @@ void Renderer3D::Init()
 
     sData.TextureSlots[1] = Texture2D::Create("assets/textures/bulb.png");
     sData.TextureSlots[1]->Bind(1);
+
+    sData.TextureSlots[2] = Texture2D::Create("assets/textures/flashlight.png");
+    sData.TextureSlots[2]->Bind(2);
 
     int samplers[sData.MaxTextureSlots];
     for (uint32_t i = 0; i < sData.MaxTextureSlots; i++)
@@ -200,8 +146,11 @@ void Renderer3D::BeginScene(const Ref<SceneCamera>& camera)
     sData.BatchShader->Bind();
     sData.BatchShader->SetUniformMat4("u_Projection", camera->GetProjectionMatrix());
     sData.BatchShader->SetUniformMat4("u_View", camera->GetViewMatrix());
-
     sData.BatchShader->SetUniformFloat3("u_CamPos", camera->GetPosition());
+    if (sData.Gamma)
+    {
+        sData.BatchShader->SetUniformFloat("u_Gamma", *sData.Gamma);
+    }
 
     sData.Camera = camera;
 
@@ -222,20 +171,20 @@ void Renderer3D::DrawVoxel(const glm::mat4& transform, const glm::vec4& color)
         NextBatch();
     }
 
-    for (uint32_t i = 0; i < 8; i++)
+    for (uint32_t i = 0; i < 24; i++)
     {
-        glm::vec3 Pos = transform * glm::vec4(sData.CubeVertices[i], 1.0);
+        glm::vec3 Pos = transform * glm::vec4(Cuboid::Vertices[i], 1.0);
         sData.BatchVertexBufferPtr->Position = Pos;
         sData.BatchVertexBufferPtr->Color = color;
-        sData.BatchVertexBufferPtr->TexCoord = sData.TexCoords[i];
-        sData.BatchVertexBufferPtr->Normal = Pos;
+        sData.BatchVertexBufferPtr->TexCoord = Cuboid::TexCoords[i];
+        sData.BatchVertexBufferPtr->Normal = Cuboid::Normals[i / 4];
         sData.BatchVertexBufferPtr->TexIndex = 0.0f;
         sData.BatchVertexBufferPtr++;
     }
 
     sData.IndexCount += 36;
 
-    sData.Stats.VertexCount += 8;
+    sData.Stats.VertexCount += 24;
     sData.Stats.TriangleCount += 12;
     sData.Stats.VoxelCount++;
 }
@@ -264,25 +213,25 @@ void Renderer3D::DrawSprite(const glm::mat4& transform, const Ref<Texture>& text
         sData.TextureSlotIndex++;
     }
 
-    for (uint32_t i = 0; i < 8; i++)
+    for (uint32_t i = 0; i < 24; i++)
     {
-        glm::vec3 Pos = transform * glm::vec4(sData.CubeVertices[i], 1.0);
+        glm::vec3 Pos = transform * glm::vec4(Cuboid::Vertices[i], 1.0);
         sData.BatchVertexBufferPtr->Position = Pos;
         sData.BatchVertexBufferPtr->Color = color;
-        sData.BatchVertexBufferPtr->TexCoord = sData.TexCoords[i];
-        sData.BatchVertexBufferPtr->Normal = Pos;
+        sData.BatchVertexBufferPtr->TexCoord = Cuboid::TexCoords[i];
+        sData.BatchVertexBufferPtr->Normal = Cuboid::Normals[i / 4];
         sData.BatchVertexBufferPtr->TexIndex = textureIndex;
         sData.BatchVertexBufferPtr++;
     }
 
     sData.IndexCount += 36;
 
-    sData.Stats.VertexCount += 8;
+    sData.Stats.VertexCount += 24;
     sData.Stats.TriangleCount += 12;
     sData.Stats.VoxelCount++;
 }
 
-void Renderer3D::DrawLight(const glm::vec3& position, Light& light, uint32_t index)
+void Renderer3D::DrawPointLight(const glm::vec3& position, PointLight& light, uint32_t index)
 {
     if (sData.IndexCount >= RendererData::MaxIndices)
     {
@@ -290,42 +239,103 @@ void Renderer3D::DrawLight(const glm::vec3& position, Light& light, uint32_t ind
     }
 
     light.Position = position;
-    SetLightUniforms(light, index);
+    SetPointLightUniforms(light, index);
 
     glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
 
-    for (uint32_t i = 0; i < 8; i++)
+    for (uint32_t i = 0; i < 24; i++)
     {
-        glm::vec3 Pos = transform * glm::vec4(sData.CubeVertices[i], 1.0);
+        glm::vec3 Pos = transform * glm::vec4(Cuboid::Vertices[i], 1.0);
         sData.BatchVertexBufferPtr->Position = Pos;
         sData.BatchVertexBufferPtr->Color = glm::vec4(1.0f);
-        sData.BatchVertexBufferPtr->TexCoord = sData.TexCoords[i];
-        sData.BatchVertexBufferPtr->Normal = Pos;
+        sData.BatchVertexBufferPtr->TexCoord = Cuboid::TexCoords[i];
+        sData.BatchVertexBufferPtr->Normal = Cuboid::Normals[i / 4];
         sData.BatchVertexBufferPtr->TexIndex = 1.0f;
         sData.BatchVertexBufferPtr++;
     }
 
     sData.IndexCount += 36;
 
-    sData.Stats.VertexCount += 8;
+    sData.Stats.VertexCount += 24;
     sData.Stats.TriangleCount += 12;
     sData.Stats.VoxelCount++;
 }
 
-void Renderer3D::SetLightUniforms(const Light& light, uint32_t index)
+void Renderer3D::DrawSpotLight(const glm::vec3 &position, SpotLight &Light)
+{
+    if (sData.IndexCount >= RendererData::MaxIndices)
+    {
+        NextBatch();
+    }
+
+    Light.Position = position;
+    SetSpotLightUniforms(Light);
+
+    glm::mat4 transform = glm::translate(glm::mat4(1.0f), position);
+
+    for (uint32_t i = 0; i < 24; i++)
+    {
+        glm::vec3 Pos = transform * glm::vec4(Cuboid::Vertices[i], 1.0);
+        sData.BatchVertexBufferPtr->Position = Pos;
+        sData.BatchVertexBufferPtr->Color = glm::vec4(1.0f);
+        sData.BatchVertexBufferPtr->TexCoord = Cuboid::TexCoords[i];
+        sData.BatchVertexBufferPtr->Normal = Cuboid::Normals[i / 4];
+        sData.BatchVertexBufferPtr->TexIndex = 2.0f;
+        sData.BatchVertexBufferPtr++;
+    }
+
+    sData.IndexCount += 36;
+
+    sData.Stats.VertexCount += 24;
+    sData.Stats.TriangleCount += 12;
+    sData.Stats.VoxelCount++;
+
+}
+
+void Renderer3D::SetGlobalLight(const DirLight& light)
+{
+    SetDirLightUniforms(light);
+}
+
+void Renderer3D::SetPointLightUniforms(const PointLight& light, uint32_t index)
 {
     sData.BatchShader->Bind();
-    sData.BatchShader->SetUniformFloat3("u_Lights[" + std::to_string(index) + "].Position", light.Position);
+    sData.BatchShader->SetUniformFloat3("u_PointLights[" + std::to_string(index) + "].Position", light.Position);
+    sData.BatchShader->SetUniformFloat( "u_PointLights[" + std::to_string(index) + "].Constant", light.Constant);
+    sData.BatchShader->SetUniformFloat( "u_PointLights[" + std::to_string(index) + "].Linear", light.Linear);
+    sData.BatchShader->SetUniformFloat( "u_PointLights[" + std::to_string(index) + "].Quadratic", light.Quadratic);
+    sData.BatchShader->SetUniformFloat3("u_PointLights[" + std::to_string(index) + "].Ambient", light.Ambient);
+    sData.BatchShader->SetUniformFloat3("u_PointLights[" + std::to_string(index) + "].Diffuse", light.Diffuse);
+    sData.BatchShader->SetUniformFloat3("u_PointLights[" + std::to_string(index) + "].Specular", light.Specular);
+}
 
-    sData.BatchShader->SetUniformFloat3("u_Lights[" + std::to_string(index) + "].Ambient", light.Ambient);
-    sData.BatchShader->SetUniformFloat("u_Lights[" + std::to_string(index) + "].AmbientIntensity", light.AmbientIntensity);
+void Renderer3D::SetSpotLightUniforms(const SpotLight& light)
+{
+    sData.BatchShader->Bind();
+    sData.BatchShader->SetUniformFloat3("u_SpotLight.Position", light.Position);
+    sData.BatchShader->SetUniformFloat3("u_SpotLight.Direction", light.Direction);
+    sData.BatchShader->SetUniformFloat("u_SpotLight.CutOff", light.CutOff);
+    sData.BatchShader->SetUniformFloat("u_SpotLight.OuterCutOff", light.OuterCutOff);
+    sData.BatchShader->SetUniformFloat("u_SpotLight.Constant", light.Constant);
+    sData.BatchShader->SetUniformFloat("u_SpotLight.Linear", light.Linear);
+    sData.BatchShader->SetUniformFloat("u_SpotLight.Quadratic", light.Quadratic);
+    sData.BatchShader->SetUniformFloat3("u_SpotLight.Ambient", light.Ambient);
+    sData.BatchShader->SetUniformFloat3("u_SpotLight.Diffuse", light.Diffuse);
+    sData.BatchShader->SetUniformFloat3("u_SpotLight.Specular", light.Specular);
+}
 
-    sData.BatchShader->SetUniformFloat3("u_Lights[" + std::to_string(index) + "].Diffuse", light.Diffuse);
-    sData.BatchShader->SetUniformFloat("u_Lights[" + std::to_string(index) + "].DiffuseIntensity", light.DiffuseIntensity);
+void Renderer3D::SetDirLightUniforms(const DirLight& light)
+{
+    sData.BatchShader->Bind();
+    sData.BatchShader->SetUniformFloat3("u_DirLight.Direction", light.Direction);
+    sData.BatchShader->SetUniformFloat3("u_DirLight.Ambient", light.Ambient);
+    sData.BatchShader->SetUniformFloat3("u_DirLight.Diffuse", light.Diffuse);
+    sData.BatchShader->SetUniformFloat3("u_DirLight.Specular", light.Specular);
+}
 
-    sData.BatchShader->SetUniformFloat3("u_Lights[" + std::to_string(index) + "].Specular", light.Specular);
-    sData.BatchShader->SetUniformFloat("u_Lights[" + std::to_string(index) + "].SpecularIntensity", light.SpecularIntensity);
-    sData.BatchShader->SetUniformFloat("u_Lights[" + std::to_string(index) + "].Shininess", light.Shininess);
+void Renderer3D::SetGamma(float* gamma)
+{
+    sData.Gamma = gamma;
 }
 
 const RendererStats& Renderer3D::GetStats()

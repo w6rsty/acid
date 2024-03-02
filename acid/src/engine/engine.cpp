@@ -68,6 +68,18 @@ void Engine::Run()
     if (ImGui::Combo("Projection Type", &projectionTypeIndex_, "Perspective\0Orthographic\0"))
         scene_->GetCamera()->SetProjectionType(type[projectionTypeIndex_]);
 
+    ImGui::Separator();
+
+    ImGui::Text("Global Light:");
+    (ImGui::DragFloat3("Direction", glm::value_ptr(scene_->dirLight_.Direction), 0.1f));
+    ImGui::ColorEdit3("Ambient", glm::value_ptr(scene_->dirLight_.Ambient));
+    ImGui::ColorEdit3("Diffuse", glm::value_ptr(scene_->dirLight_.Diffuse));
+    ImGui::ColorEdit3("Specular", glm::value_ptr(scene_->dirLight_.Specular));
+
+    ImGui::Separator();
+
+    ImGui::SliderFloat("Gamma", &scene_->gamma_, 0.1f, 5.0f);
+
     ImGui::End();
 }
 
