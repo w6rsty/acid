@@ -30,27 +30,20 @@ void RenderEngine::Init()
 
     cameraPos_ = scene_->GetCamera()->GetPosition();
     cameraRot_ = scene_->GetCamera()->GetRotation();
-
-    FrameBufferSpecification spec;
-    spec.Width = 800;
-    spec.Height = 800;
-
-    frameBuffer_ = FrameBuffer::Create(spec);
 }
 
 void RenderEngine::Run()
 {
-    frameBuffer_->Bind();
     RendererCommand::Clear();
+
     Renderer3D::BeginScene(scene_->GetCamera());
+
     scene_->OnUpdate();
+    
     Renderer3D::EndScene();
-    frameBuffer_->Unbind();
-    RendererCommand::Clear();
 
     // dockspace
-
-    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+    // ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
     ImGui::Begin("Settings", nullptr);
 
@@ -79,18 +72,6 @@ void RenderEngine::Run()
 
     ImGui::Separator();
 
-    ImGui::Text("Global Light:");
-    (ImGui::DragFloat3("Direction", glm::value_ptr(scene_->dirLight_.Direction), 0.1f));
-    ImGui::ColorEdit3("Ambient", glm::value_ptr(scene_->dirLight_.Ambient));
-    ImGui::ColorEdit3("Diffuse", glm::value_ptr(scene_->dirLight_.Diffuse));
-    ImGui::ColorEdit3("Specular", glm::value_ptr(scene_->dirLight_.Specular));
-
-    ImGui::Separator();
-    ImGui::SliderFloat("Gamma", &scene_->gamma_, 0.1f, 5.0f);
-    ImGui::End();
-
-    ImGui::Begin("Scene");
-    ImGui::Image(reinterpret_cast<void*>(frameBuffer_->GetColorAttachmentID()), ImVec2(650, 650), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 }
 

@@ -15,22 +15,11 @@ public:
 
     static void BeginScene(const Ref<SceneCamera>& camera);
     static void EndScene();
-    static void Flush();
 
-    static void DrawVoxel(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f));
-    static void DrawSprite(const glm::mat4& transform, const Ref<Texture>& texture, const glm::vec4& color = glm::vec4(1.0f));
-    static void DrawPointLight(const glm::vec3& position, PointLight& Light, uint32_t index);
-    static void DrawSpotLight(const glm::vec3& position, SpotLight& Light);
-    static void SetGlobalLight(const DirLight& light);
-    static void SetGamma(float* gamma);
+    static void DrawCuboid(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f));
+    static void DrawCuboid(const glm::mat4& transform, const Ref<Texture>& texture, const glm::vec4& tintColor = glm::vec4(1.0f));
+
     static const RendererStats& GetStats();
-private:
-    static void StartBatch();
-    static void NextBatch();
-
-    static void SetPointLightUniforms(const PointLight& light, uint32_t index);
-    static void SetSpotLightUniforms(const SpotLight& light);
-    static void SetDirLightUniforms(const DirLight& light);
 };
 
 } // namespace acid

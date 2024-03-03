@@ -31,7 +31,6 @@ private:
     int projectionTypeIndex_ = 0;
 
     Ref<Scene> scene_;
-    Ref<FrameBuffer> frameBuffer_;
 
     friend class Application;
 };

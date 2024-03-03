@@ -21,9 +21,7 @@ Application::~Application()
 
 void Application::Init()
 {
-    WindowCreateInfo info;
-    info.Width = 1000;
-    window_ = Window::Create(info);
+    window_ = Window::Create({});
     engine_ = CreateRef<RenderEngine>();
 }
 
