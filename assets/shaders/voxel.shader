@@ -6,34 +6,41 @@ layout (location = 2) in vec2 a_TexCoord;
 layout (location = 3) in vec3 a_Normal;
 layout (location = 4) in float a_TexIndex;
 
-out vec3 v_Position;
-out vec4 v_Color;
-out vec2 v_TexCoord;
-out vec3 v_Normal;
-out float v_TexIndex;
+out VertexOut {
+    vec3 Position;
+    vec4 Color;
+    vec2 TexCoord;
+    vec3 Normal;
+    float TexIndex;
+} vertexOut;
 
-uniform mat4 u_Projection;
-uniform mat4 u_View;
+layout (std140) uniform Matrices
+{
+    mat4 Projection;
+    mat4 View;
+};
 
 void main()
 {
-    v_Position = a_Position;
-    v_Color = a_Color;
-    v_TexCoord = a_TexCoord;
-    v_Normal = a_Normal;
-    v_TexIndex = a_TexIndex;
-    gl_Position = u_Projection * u_View * vec4(a_Position, 1.0);
+    vertexOut.Position = a_Position;
+    vertexOut.Color = a_Color;
+    vertexOut.TexCoord = a_TexCoord;
+    vertexOut.Normal = a_Normal;
+    vertexOut.TexIndex = a_TexIndex;
+    gl_Position = Projection * View * vec4(a_Position, 1.0);
 }
 
 #type fragment
 #version 410 core
 layout (location = 0) out vec4 color;
 
-in vec3 v_Position;
-in vec4 v_Color;
-in vec2 v_TexCoord;
-in vec3 v_Normal;
-in float v_TexIndex;
+in VertexOut {
+    vec3 Position;
+    vec4 Color;
+    vec2 TexCoord;
+    vec3 Normal;
+    float TexIndex;
+} vertexOut;
 
 uniform sampler2D u_Textures[16];
 
@@ -91,22 +98,22 @@ vec3 CalcDirLight(vec3 normal, DirLight light, vec3 viewDir);
 
 void main()
 {   
-    vec4 texColor = texture(u_Textures[int(v_TexIndex)], v_TexCoord);
+    vec4 texColor = texture(u_Textures[int(vertexOut.TexIndex)], vertexOut.TexCoord);
     if (texColor.a < 0.1)
         discard;
 
-    vec3 norm = normalize(v_Normal);
-    vec3 viewDir = normalize(u_CamPos - v_Position);
+    vec3 norm = normalize(vertexOut.Normal);
+    vec3 viewDir = normalize(u_CamPos - vertexOut.Position);
 
     vec3 result = vec3(0.0);
     result += CalcDirLight(norm, u_DirLight, viewDir);
-    result += CalcSpotLight(norm, u_SpotLight, viewDir, v_Position);
+    result += CalcSpotLight(norm, u_SpotLight, viewDir, vertexOut.Position);
     for (int i = 0; i < MAX_POINT_LIGHTS; i++)
     {
-        result += CalcPointLight(norm, u_PointLights[i], viewDir, v_Position);
+        result += CalcPointLight(norm, u_PointLights[i], viewDir, vertexOut.Position) * 0.5;
     }
 
-    vec3 hdr = result * texColor.rgb * v_Color.rgb;
+    vec3 hdr = result * texColor.rgb * vertexOut.Color.rgb;
     vec3 mapped = pow(hdr, vec3(1.0 / u_Gamma));
 
     color = vec4(mapped, texColor.a);
@@ -114,7 +121,7 @@ void main()
 
 vec3 CalcPointLight(vec3 normal, PointLight light, vec3 viewDir, vec3 fragPos)
 {
-    float shininess = 2.0;
+    float shininess = 4.0;
 
     vec3 lightDir = normalize(light.Position - fragPos);
     float distance = length(light.Position - fragPos);
@@ -133,7 +140,7 @@ vec3 CalcPointLight(vec3 normal, PointLight light, vec3 viewDir, vec3 fragPos)
 
 vec3 CalcSpotLight(vec3 normal, SpotLight light, vec3 viewDir, vec3 fragPos)
 {
-    float shininess = 10.0;
+    float shininess = 32.0;
 
     vec3 lightDir = normalize(light.Position - fragPos);
     float distance = length(light.Position - fragPos);

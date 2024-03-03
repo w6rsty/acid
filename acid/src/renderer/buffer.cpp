@@ -57,7 +57,16 @@ Ref<UniformBuffer> UniformBuffer::Create(size_t size, uint32_t binding)
     switch (RendererAPI::GetAPI())
     {
         case RendererAPI::API::None: AC_ASSERT_MSG(false, "AcidGraphicAPI::None is not supported"); return nullptr;
-        case RendererAPI::API::OpenGL: return nullptr;
+        case RendererAPI::API::OpenGL: return CreateRef<OpenGLUniformBuffer>(size, binding);
+    }
+}
+
+Ref<UniformBuffer> UniformBuffer::Create(size_t size, uint32_t binding, uint32_t offset)
+{
+    switch (RendererAPI::GetAPI())
+    {
+        case RendererAPI::API::None: AC_ASSERT_MSG(false, "AcidGraphicAPI::None is not supported"); return nullptr;
+        case RendererAPI::API::OpenGL: return CreateRef<OpenGLUniformBuffer>(size, binding, offset);
     }
 }
 

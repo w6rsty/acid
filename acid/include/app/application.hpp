@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/base.hpp"
-#include "engine/engine.hpp"
+#include "app/render_engine.hpp"
 #include "window/window.hpp"
 
 namespace acid
@@ -23,7 +23,7 @@ public:
 private:
     static Application* sInstance_;
     Ref<Window> window_;
-    Ref<Engine> engine_;
+    Ref<RenderEngine> engine_;
 };
 
 } // namespace acid 

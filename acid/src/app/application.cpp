@@ -1,7 +1,8 @@
-#include "engine/application.hpp"
+#include "app/application.hpp"
 
 #include "core/log.hpp"
 #include "ImGui/imgui_utils.hpp"
+#include "window/window.hpp"
 
 namespace acid
 {
@@ -20,8 +21,10 @@ Application::~Application()
 
 void Application::Init()
 {
-    window_ = Window::Create({});
-    engine_ = CreateRef<Engine>();
+    WindowCreateInfo info;
+    info.Width = 1000;
+    window_ = Window::Create(info);
+    engine_ = CreateRef<RenderEngine>();
 }
 
 void Application::Run()

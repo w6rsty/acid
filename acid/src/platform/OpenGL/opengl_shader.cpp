@@ -259,5 +259,10 @@ void OpenGLShader::UploadUniformMat4(const std::string& name, const glm::mat4& v
     glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(value));
 }
 
+void OpenGLShader::BindUniformBlock(const std::string &name, uint32_t index)
+{
+    GLuint blockIndex = glGetUniformBlockIndex(rendererID_, name.c_str());
+    glUniformBlockBinding(rendererID_, blockIndex, index);
+}
 
 } // namespace acid

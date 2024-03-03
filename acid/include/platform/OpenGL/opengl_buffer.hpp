@@ -1,6 +1,7 @@
 #pragma once
 
 #include "renderer/buffer.hpp"
+#include <_types/_uint32_t.h>
 
 namespace acid
 {
@@ -57,4 +58,18 @@ private:
     uint32_t depthAttachment_;
 };
  
+class OpenGLUniformBuffer final : public UniformBuffer
+{
+public:
+    OpenGLUniformBuffer(size_t size, uint32_t binding);
+    OpenGLUniformBuffer(size_t size, uint32_t binding, uint32_t offset);
+    virtual ~OpenGLUniformBuffer() override;
+
+    virtual void Bind() const override;
+    virtual void Unbind() const override;
+    virtual void SetData(const void* data, size_t size, uint32_t offset) override;
+private:
+    uint32_t rendererID_;
+};
+
 } // namespace acid

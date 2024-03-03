@@ -2,6 +2,7 @@
 
 #include "core/log.hpp"
 #include "geometry/cuboid.hpp"
+#include "renderer/buffer.hpp"
 #include "renderer/shader.hpp"
 #include "renderer/renderer_enum.hpp"
 #include "renderer/vertex_array.hpp"
@@ -11,6 +12,7 @@
 #include "glm/ext/matrix_transform.hpp"
 
 #include <array>
+#include <functional>
 
 namespace acid
 {
@@ -33,6 +35,12 @@ struct RendererData
 
     Ref<VertexArray> BatchVA = nullptr;
     Ref<Shader> BatchShader = nullptr;
+    Ref<UniformBuffer> UniformBuffer = nullptr;
+    std::function<void()> SetUniformData = [&]() {
+        BatchShader->BindUniformBlock("Matrices", 0);
+        UniformBuffer->SetData(&Camera->GetProjectionMatrix(), sizeof(glm::mat4));
+        UniformBuffer->SetData(&Camera->GetViewMatrix(), sizeof(glm::mat4), sizeof(glm::mat4));
+    };
 
     Vertex* BatchVertexBufferBase = nullptr;
     Vertex* BatchVertexBufferPtr = nullptr;
@@ -85,6 +93,8 @@ void Renderer3D::Init()
     Ref<IndexBuffer> indexBuffer = IndexBuffer::Create(indices, RendererData::MaxIndices * sizeof(uint32_t));
     sData.BatchVA->SetIndexBuffer(indexBuffer);
     delete[] indices;
+
+    sData.UniformBuffer = UniformBuffer::Create(2 * sizeof(glm::mat4), 0);
 
     sData.TextureSlots[0] = Texture2D::Create(1, 1);
     uint32_t blankTex = 0xffffffff;
@@ -142,17 +152,19 @@ void Renderer3D::Flush()
 
 void Renderer3D::BeginScene(const Ref<SceneCamera>& camera)
 {
-    sData.Stats.Reset();
-    sData.BatchShader->Bind();
-    sData.BatchShader->SetUniformMat4("u_Projection", camera->GetProjectionMatrix());
-    sData.BatchShader->SetUniformMat4("u_View", camera->GetViewMatrix());
-    sData.BatchShader->SetUniformFloat3("u_CamPos", camera->GetPosition());
-    if (sData.Gamma)
-    {
-        sData.BatchShader->SetUniformFloat("u_Gamma", *sData.Gamma);
+    if (!sData.Camera) {
+        sData.Camera = camera;
+        sData.SetUniformData();
     }
 
-    sData.Camera = camera;
+    sData.Stats.Reset();
+    sData.BatchShader->Bind();
+
+    sData.BatchShader->SetUniformFloat3("u_CamPos", camera->GetPosition());
+    if (sData.Gamma)
+    {   
+        sData.BatchShader->SetUniformFloat("u_Gamma", *sData.Gamma);
+    }
 
     StartBatch();
 }

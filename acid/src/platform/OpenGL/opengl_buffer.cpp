@@ -91,7 +91,7 @@ OpenGLFrameBuffer::OpenGLFrameBuffer(const FrameBufferSpecification& spec)
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, spec_.Width, spec_.Height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
@@ -125,6 +125,44 @@ void OpenGLFrameBuffer::Bind() const
 void OpenGLFrameBuffer::Unbind() const
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+OpenGLUniformBuffer::OpenGLUniformBuffer(size_t size, uint32_t binding)
+{
+    glGenBuffers(1, &rendererID_);
+    glBindBuffer(GL_UNIFORM_BUFFER, rendererID_);
+    glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+    glBindBufferRange(GL_UNIFORM_BUFFER, binding, rendererID_, 0, size);
+}
+
+OpenGLUniformBuffer::OpenGLUniformBuffer(size_t size, uint32_t binding, uint32_t offset)
+{
+    glGenBuffers(1, &rendererID_);
+    glBindBuffer(GL_UNIFORM_BUFFER, rendererID_);
+    glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_DYNAMIC_DRAW);
+    glBindBufferRange(GL_UNIFORM_BUFFER, binding, rendererID_, offset, size);
+}
+
+
+OpenGLUniformBuffer::~OpenGLUniformBuffer()
+{
+    glDeleteBuffers(1, &rendererID_);
+}
+
+void OpenGLUniformBuffer::Bind() const
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, rendererID_);
+}
+
+void OpenGLUniformBuffer::Unbind() const 
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+}
+
+void OpenGLUniformBuffer::SetData(const void *data, size_t size, uint32_t offset)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, rendererID_);
+    glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 }
 
 } // namespace acid

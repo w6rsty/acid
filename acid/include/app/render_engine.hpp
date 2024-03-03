@@ -13,11 +13,11 @@ namespace acid
 class Application;
 
 /// Driven the core functions
-class Engine
+class RenderEngine
 {
 public:
-    Engine();
-    ~Engine();
+    RenderEngine();
+    ~RenderEngine();
 
     void Init();
     void Run();
@@ -31,6 +31,7 @@ private:
     int projectionTypeIndex_ = 0;
 
     Ref<Scene> scene_;
+    Ref<FrameBuffer> frameBuffer_;
 
     friend class Application;
 };

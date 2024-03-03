@@ -26,11 +26,13 @@ private:
     PointLight pointLights_[4];
     DirLight dirLight_;
     SpotLight spotLight_;
-    float gamma_;
+    float gamma_ = 1.2f;
 
     Ref<SceneCamera> camera_;
 
-    friend class Engine;
+    Ref<Texture> texture_;
+
+    friend class RenderEngine;
 };
 
 } // namespace acid

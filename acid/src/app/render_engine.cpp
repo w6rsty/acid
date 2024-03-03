@@ -1,4 +1,4 @@
-#include "engine/engine.hpp"
+#include "app/render_engine.hpp"
 
 #include "renderer/buffer.hpp"
 #include "renderer/camera/camera.hpp"
@@ -13,37 +13,46 @@
 namespace acid
 {
 
-Engine::Engine()
+RenderEngine::RenderEngine()
 {
     Init(); // Init Engine self
     Renderer::Init(); // Init Renderer
 } 
 
-Engine::~Engine()
+RenderEngine::~RenderEngine()
 {
     running_ = false;
 }
 
-void Engine::Init()
+void RenderEngine::Init()
 {
     scene_ = CreateRef<Scene>();
 
     cameraPos_ = scene_->GetCamera()->GetPosition();
     cameraRot_ = scene_->GetCamera()->GetRotation();
+
+    FrameBufferSpecification spec;
+    spec.Width = 800;
+    spec.Height = 800;
+
+    frameBuffer_ = FrameBuffer::Create(spec);
 }
 
-void Engine::Run()
+void RenderEngine::Run()
 {
-    RendererCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
+    frameBuffer_->Bind();
+    RendererCommand::Clear();
+    Renderer3D::BeginScene(scene_->GetCamera());
+    scene_->OnUpdate();
+    Renderer3D::EndScene();
+    frameBuffer_->Unbind();
     RendererCommand::Clear();
 
-    Renderer3D::BeginScene(scene_->GetCamera());
+    // dockspace
 
-    scene_->OnUpdate();
+    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
-    Renderer3D::EndScene();
-
-    ImGui::Begin("Settings");
+    ImGui::Begin("Settings", nullptr);
 
     auto& stats = Renderer3D::GetStats();
     ImGui::Text("Renderer3D Stats:");
@@ -77,9 +86,11 @@ void Engine::Run()
     ImGui::ColorEdit3("Specular", glm::value_ptr(scene_->dirLight_.Specular));
 
     ImGui::Separator();
-
     ImGui::SliderFloat("Gamma", &scene_->gamma_, 0.1f, 5.0f);
+    ImGui::End();
 
+    ImGui::Begin("Scene");
+    ImGui::Image(reinterpret_cast<void*>(frameBuffer_->GetColorAttachmentID()), ImVec2(650, 650), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 }
 

@@ -26,6 +26,8 @@ public:
     virtual void SetUniformFloat4(const std::string& name, const glm::vec4& value) = 0;
     virtual void SetUniformMat3(const std::string& name, const glm::mat3& value) = 0;
     virtual void SetUniformMat4(const std::string& name, const glm::mat4& value) = 0;
+
+    virtual void BindUniformBlock(const std::string& name, uint32_t index) = 0;
 protected:
     virtual void UploadUniformInt(const std::string& name, const int value) = 0;
     virtual void UploadUniformIntArray(const std::string& name, int* values, uint32_t count) = 0;

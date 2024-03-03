@@ -93,8 +93,6 @@ struct FrameBufferSpecification
     bool SwapChainTarget = false;
 };
 
-
-// let me read LearnOpenGL to finish this
 class FrameBuffer
 {
 public:
@@ -119,6 +117,7 @@ public:
     virtual void SetData(const void* data, size_t size, uint32_t offset = 0) = 0;
 
     static Ref<UniformBuffer> Create(size_t size, uint32_t binding);
+    static Ref<UniformBuffer> Create(size_t size, uint32_t binding, uint32_t offset);
 };
 
 } // namespace acid

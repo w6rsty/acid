@@ -13,5 +13,5 @@
 #include "renderer/camera/camera.hpp"
 #include "renderer/camera/scene_camera.hpp"
 
-#include "engine/engine.hpp"
-#include "engine/application.hpp"
+#include "app/render_engine.hpp"
+#include "app/application.hpp"
