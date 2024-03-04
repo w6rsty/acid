@@ -62,8 +62,9 @@ OpenGLTexture2D::OpenGLTexture2D(const std::string& path, AC_TEXTURE_WARP_MODE m
         AC_ASSERT_MSG(false, "Unknown format!");
     }
 
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 

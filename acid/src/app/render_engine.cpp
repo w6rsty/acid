@@ -81,8 +81,6 @@ void RenderEngine::Run()
     if (ImGui::Combo("Projection", &cameraData_.ProjectionTypeIndex, "Perspective\0Orthographic\0"))
         currentScene_->GetCamera()->SetProjectionType(type[cameraData_.ProjectionTypeIndex]);
 
-    ImGui::Separator();
-
     ImGui::End();
 
     ImGui::Begin("Scene");
