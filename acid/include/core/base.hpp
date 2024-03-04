@@ -26,20 +26,15 @@ constexpr Scope<T> CreateScope(Args&&... args)
 struct RendererStats
 {
     uint32_t DrawCalls = 0;
-    uint32_t VoxelCount = 0;
     uint32_t VertexCount = 0;
     uint32_t TriangleCount = 0;
     uint32_t LightCount = 0;
 
-    uint32_t GetTotalVertexCount() const { return VertexCount; }
-    uint32_t GetTotalTriangleCount() const { return TriangleCount; }
-    uint32_t GetTotalDrawCalls() const { return DrawCalls; }
     void Reset()
     {
         DrawCalls = 0;
         VertexCount = 0;
         TriangleCount = 0;
-        VoxelCount = 0;
         LightCount = 0;
     }
 };

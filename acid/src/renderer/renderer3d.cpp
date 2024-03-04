@@ -1,8 +1,11 @@
 #include "renderer/renderer3d.hpp"
 
+#include "core/assert.hpp"
 #include "core/log.hpp"
 #include "geometry/cuboid.hpp"
 #include "renderer/buffer.hpp"
+#include "renderer/camera/camera.hpp"
+#include "renderer/light/light.hpp"
 #include "renderer/shader.hpp"
 #include "renderer/vertex_array.hpp"
 #include "renderer/renderer_command.hpp"
@@ -11,6 +14,7 @@
 #include "glm/ext/matrix_transform.hpp"
 
 #include <array>
+#include <vector>
 #include <functional>
 
 namespace acid
@@ -28,18 +32,35 @@ struct Vertex
 struct RendererData
 {
     RendererStats Stats;
+    const uint32_t MaxPointLights = 10;
 
     Ref<VertexArray> VoxelVAO = nullptr;
     Ref<Shader> VoxelFlatColorShader = nullptr;
     Ref<Shader> VoxelTextureShader = nullptr;
 
-    Ref<UniformBuffer> UBO = nullptr;
+    Ref<UniformBuffer> MatrixUBO = nullptr;
+    Ref<UniformBuffer> LightUBO = nullptr;
+    uint32_t LightIndex = 0;
+    uint32_t LightBufferOffset = 0;
+    std::vector<PointLight> PointLights;
+
     std::function<void()> SetUniformData = [&]() {
-        UBO->SetData(&Camera->GetProjectionMatrix(), sizeof(glm::mat4));
-        UBO->SetData(&Camera->GetViewMatrix(), sizeof(glm::mat4), sizeof(glm::mat4));
+        MatrixUBO->SetData(&Camera->GetProjectionMatrix(), sizeof(glm::mat4));
+        MatrixUBO->SetData(&Camera->GetViewMatrix(), sizeof(glm::mat4), sizeof(glm::mat4));
 
         VoxelFlatColorShader->BindUniformBlock("Matrices", 0);
         VoxelTextureShader->BindUniformBlock("Matrices", 0);
+
+        VoxelFlatColorShader->BindUniformBlock("Lights", 1);
+        VoxelTextureShader->BindUniformBlock("Lights", 1);
+
+        for (auto& light : PointLights)
+        {
+            LightUBO->SetData(&light, POINT_LIGHT_STD_140_SIZE, LightBufferOffset);
+            LightBufferOffset += POINT_LIGHT_STD_140_SIZE;
+            LightIndex++;
+            LightUBO->SetData(&LightIndex, sizeof(uint32_t), POINT_LIGHT_STD_140_SIZE * MaxPointLights);
+        }
     };
     
     Ref<SceneCamera> Camera = nullptr;
@@ -85,7 +106,8 @@ void Renderer3D::Init()
         sData.VoxelTextureShader = Shader::Create("assets/shaders/texture.shader");
     }
     {
-        sData.UBO = UniformBuffer::Create(2 * sizeof(glm::mat4), 0);
+        sData.MatrixUBO = UniformBuffer::Create(2 * sizeof(glm::mat4), 0);
+        sData.LightUBO = UniformBuffer::Create(POINT_LIGHT_STD_140_SIZE * sData.MaxPointLights + sizeof(uint32_t), 1);
     }
 }
 
@@ -107,6 +129,7 @@ void Renderer3D::BeginScene(const Ref<SceneCamera>& camera)
 void Renderer3D::EndScene()
 {   
     sData.Camera = nullptr;
+    sData.PointLights.clear();
 }
 
 void Renderer3D::DrawCuboid(const glm::mat4& transform, const glm::vec4& color)
@@ -114,22 +137,23 @@ void Renderer3D::DrawCuboid(const glm::mat4& transform, const glm::vec4& color)
     sData.VoxelFlatColorShader->Bind();
 
     sData.VoxelFlatColorShader->SetUniformMat4("u_Model", transform);
-    sData.VoxelFlatColorShader->SetUniformFloat4("u_TintColor", color);
+    sData.VoxelFlatColorShader->SetUniformFloat4("u_Tint", color);
+    sData.VoxelFlatColorShader->SetUniformFloat3("u_CamPos", sData.Camera->GetPosition());
 
     RendererCommand::DrawIndexed(sData.VoxelVAO, 36);
     
     sData.Stats.DrawCalls++;
     sData.Stats.VertexCount += 24;
     sData.Stats.TriangleCount += 12;
-    sData.Stats.VoxelCount++;
 }
 
-void Renderer3D::DrawCuboid(const glm::mat4& transform, const Ref<Texture>& texture, const glm::vec4& tintColor)
+void Renderer3D::DrawCuboid(const glm::mat4& transform, const Ref<Texture>& texture, const glm::vec4& tint)
 {
     sData.VoxelTextureShader->Bind();
 
     sData.VoxelTextureShader->SetUniformMat4("u_Model", transform);
-    sData.VoxelTextureShader->SetUniformFloat4("u_TintColor", tintColor);
+    sData.VoxelTextureShader->SetUniformFloat4("u_Tint", tint);
+    sData.VoxelFlatColorShader->SetUniformFloat3("u_CamPos", sData.Camera->GetPosition());
 
     texture->Bind();
     RendererCommand::DrawIndexed(sData.VoxelVAO, 36);
@@ -137,9 +161,17 @@ void Renderer3D::DrawCuboid(const glm::mat4& transform, const Ref<Texture>& text
     sData.Stats.DrawCalls++;
     sData.Stats.VertexCount += 24;
     sData.Stats.TriangleCount += 12;
-    sData.Stats.VoxelCount++;
 }
 
+void Renderer3D::SetLight(const PointLight& light)
+{
+    if (sData.LightIndex + 1 >= sData.MaxPointLights) 
+    {
+        AC_LOG_WARN("Max point lights reached(", sData.MaxPointLights, ")");
+        return;
+    }
+    sData.PointLights.push_back(light);
+}
 
 const RendererStats& Renderer3D::GetStats()
 {

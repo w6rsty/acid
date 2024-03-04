@@ -1,8 +1,8 @@
 #pragma once
 
-#include "renderer/camera/scene_camera.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/light/light.hpp"
+#include "renderer/camera/scene_camera.hpp"
 
 #include "glm/glm.hpp"
 
@@ -14,7 +14,7 @@ class Scene
 public:
     Scene();
 
-    void Init();
+    void Setup();
     void OnUpdate();
 
     Ref<SceneCamera> GetCamera() { return camera_; }
@@ -22,6 +22,8 @@ private:
     Ref<SceneCamera> camera_;
 
     Ref<Texture> texture_;
+
+    PointLight lights_[4];
 
     friend class RenderEngine;
 };

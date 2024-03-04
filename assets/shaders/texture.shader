@@ -31,7 +31,29 @@ void main()
 #version 410 core
 layout (location = 0) out vec4 color;
 
-uniform vec4 u_TintColor;
+struct PointLight
+{
+    vec3 Position;
+
+    float Constant;
+    float Linear;
+    float Quadratic;
+
+    vec3 Ambient;
+    vec3 Diffuse;
+    vec3 Specular;
+};
+
+#define MAX_POINT_LIGHTS 10
+
+layout (std140) uniform Lights
+{
+    PointLight u_PointLights[MAX_POINT_LIGHTS];
+    int u_PointLightCount;
+};
+
+uniform vec4 u_Tint;
+uniform vec3 u_CamPos;
 uniform sampler2D u_Texture;
 
 in VertexOut
@@ -41,14 +63,43 @@ in VertexOut
     vec2 TexCoord;
 } VtxOut;
 
+vec3 CalcPointLight(vec3 normal, PointLight light, vec3 viewDir, vec3 fragPos);
+
 void main()
 {   
     vec4 texColor = texture(u_Texture, VtxOut.TexCoord);
     if (texColor.a < 0.1)
     {
-        color = vec4(0.3, 0.3, 0.3, 0.3);
+        color = vec4(1.0, 1.0, 1.0, 0.1);
         return;
     }
 
-    color = texColor * u_TintColor;
+    vec3 normal = normalize(VtxOut.Normal);
+    vec3 viewDir = normalize(u_CamPos - VtxOut.FragPos);
+
+    vec3 result = vec3(0.0);
+    for (int i = 0; i < u_PointLightCount; i++)
+    {
+        result += CalcPointLight(normal, u_PointLights[i], viewDir, VtxOut.FragPos);
+    }
+    color = vec4(result, 1.0) * texColor * u_Tint;
+}
+
+vec3 CalcPointLight(vec3 normal, PointLight light, vec3 viewDir, vec3 fragPos)
+{
+    float shininess = 2.0;
+
+    vec3 lightDir = normalize(light.Position - fragPos);
+    float distance = length(light.Position - fragPos);
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float attenuation = 1.0 / (light.Constant + light.Linear * distance + light.Quadratic * (distance * distance));
+    float diff = max(dot(normal, lightDir), 0.0);
+    float illuminated = diff > 0.0 ? 1.0 : 0.0;
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+
+    vec3 ambient = light.Ambient * illuminated;
+    vec3 diffuse = light.Diffuse * diff;
+    vec3 specular = light.Specular * spec * illuminated;
+
+    return attenuation * (ambient + diffuse + specular);
 }

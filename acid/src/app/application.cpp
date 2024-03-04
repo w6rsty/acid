@@ -21,7 +21,9 @@ Application::~Application()
 
 void Application::Init()
 {
-    window_ = Window::Create({});
+    WindowCreateInfo info;
+    info.Width = 1000;
+    window_ = Window::Create(info);
     engine_ = CreateRef<RenderEngine>();
 }
 
@@ -29,9 +31,12 @@ void Application::Run()
 {
     while (engine_->running_)
     {
-        ImGuiLayer::Begin();
-        engine_->Run();
-        ImGuiLayer::End();
+        if (engine_->ready_)
+        {
+            ImGuiLayer::Begin();
+            engine_->Run();
+            ImGuiLayer::End();
+        }
         window_->OnUpdate();
     }
 }

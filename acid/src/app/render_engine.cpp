@@ -26,52 +26,67 @@ RenderEngine::~RenderEngine()
 
 void RenderEngine::Init()
 {
-    scene_ = CreateRef<Scene>();
+    currentScene_ = CreateRef<Scene>();
 
-    cameraPos_ = scene_->GetCamera()->GetPosition();
-    cameraRot_ = scene_->GetCamera()->GetRotation();
+    FrameBufferSpecification spec;
+    spec.Width = 640;
+    spec.Height = 640;
+    frameBuffer_ = FrameBuffer::Create(spec);
+
+    cameraData_.Pos = currentScene_->GetCamera()->GetPosition();
+    cameraData_.Rot = currentScene_->GetCamera()->GetRotation();
+}
+
+void RenderEngine::LoadScene(const Ref<Scene>& scene)
+{
+    
 }
 
 void RenderEngine::Run()
 {
+    frameBuffer_->Bind();
     RendererCommand::Clear();
 
-    Renderer3D::BeginScene(scene_->GetCamera());
+    Renderer3D::BeginScene(currentScene_->GetCamera());
 
-    scene_->OnUpdate();
+    currentScene_->OnUpdate();
     
     Renderer3D::EndScene();
+    frameBuffer_->Unbind();
 
     // dockspace
-    // ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
     ImGui::Begin("Settings", nullptr);
 
     auto& stats = Renderer3D::GetStats();
     ImGui::Text("Renderer3D Stats:");
     ImGui::Text("Draw Calls: %d", stats.DrawCalls);
-    ImGui::Text("Vertices: %d", stats.GetTotalVertexCount());
-    ImGui::Text("Triangles: %d", stats.GetTotalTriangleCount());
-    ImGui::Text("Voxels: %d", stats.VoxelCount);
+    ImGui::Text("Vertices: %d", stats.VertexCount);
+    ImGui::Text("Triangles: %d", stats.TriangleCount);
 
     ImGui::Separator();
-    if (ImGui::DragFloat3("Camera Position", glm::value_ptr(cameraPos_), 0.1f))
+    if (ImGui::DragFloat3("Cam Pos", glm::value_ptr(cameraData_.Pos), 0.1f))
     {
-        scene_->GetCamera()->SetPosition(cameraPos_);
+        currentScene_->GetCamera()->SetPosition(cameraData_.Pos);
     }
 
-    if (ImGui::DragFloat3("Camera Rotation", glm::value_ptr(cameraRot_), 0.1f))
+    if (ImGui::DragFloat3("Cam Rot", glm::value_ptr(cameraData_.Rot), 0.1f))
     {
-        scene_->GetCamera()->SetRotation(cameraRot_);
+        currentScene_->GetCamera()->SetRotation(cameraData_.Rot);
     }
 
     ProjectionType type[2] = {ProjectionType::Perspective, ProjectionType::Orthographic};
 
-    if (ImGui::Combo("Projection Type", &projectionTypeIndex_, "Perspective\0Orthographic\0"))
-        scene_->GetCamera()->SetProjectionType(type[projectionTypeIndex_]);
+    if (ImGui::Combo("Projection", &cameraData_.ProjectionTypeIndex, "Perspective\0Orthographic\0"))
+        currentScene_->GetCamera()->SetProjectionType(type[cameraData_.ProjectionTypeIndex]);
 
     ImGui::Separator();
 
+    ImGui::End();
+
+    ImGui::Begin("Scene");
+    ImGui::Image(reinterpret_cast<void*>(frameBuffer_->GetColorAttachmentID()), ImVec2(650, 650), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 }
 
