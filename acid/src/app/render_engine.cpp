@@ -29,8 +29,8 @@ void RenderEngine::Init()
     currentScene_ = CreateRef<Scene>();
 
     FrameBufferSpecification spec;
-    spec.Width = 640;
-    spec.Height = 640;
+    spec.Width = 800;
+    spec.Height = 600;
     frameBuffer_ = FrameBuffer::Create(spec);
 
     cameraData_.Pos = currentScene_->GetCamera()->GetPosition();
@@ -84,7 +84,7 @@ void RenderEngine::Run()
     ImGui::End();
 
     ImGui::Begin("Scene");
-    ImGui::Image(reinterpret_cast<void*>(frameBuffer_->GetColorAttachmentID()), ImVec2(650, 650), ImVec2(0, 1), ImVec2(1, 0));
+    ImGui::Image(reinterpret_cast<void*>(frameBuffer_->GetColorAttachmentID()), ImVec2(800, 600), ImVec2(0, 1), ImVec2(1, 0));
     ImGui::End();
 }
 

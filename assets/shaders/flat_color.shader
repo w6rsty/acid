@@ -44,12 +44,38 @@ struct PointLight
     vec3 Specular;
 };
 
-#define MAX_POINT_LIGHTS 10
+struct SpotLight
+{
+    vec3 Position;
+    vec3 Direction;
+    float Constant;
+    float Linear;
+    float Quadratic;
+    vec3 Ambient;
+    vec3 Diffuse;
+    vec3 Specular;
+};
+
+struct DirLight
+{
+    vec3 Direction;
+    vec3 Ambient;
+    vec3 Diffuse;
+    vec3 Specular;
+};
+
+#define MAX_POINT_LIGHTS 16
+#define MAX_SPOT_LIGHTS 16
+#define MAX_DIR_LIGHTS 4
 
 layout (std140) uniform Lights
 {
     PointLight u_PointLights[MAX_POINT_LIGHTS];
+    SpotLight u_SpotLights[MAX_SPOT_LIGHTS];
+    DirLight u_DirLights[MAX_DIR_LIGHTS];
     int u_PointLightCount;
+    int u_SpotLightCount;
+    int u_DirLightCount;
 };
 
 uniform vec4 u_Tint;
@@ -63,6 +89,8 @@ in VertexOut
 } VtxOut;
 
 vec3 CalcPointLight(vec3 normal, PointLight light, vec3 viewDir, vec3 fragPos);
+vec3 CalcSpotLight(vec3 normal, SpotLight light, vec3 viewDir, vec3 fragPos);
+vec3 CalcDirLight(vec3 normal, DirLight light, vec3 viewDir);
 
 void main()
 {   
@@ -73,7 +101,15 @@ void main()
     for (int i = 0; i < u_PointLightCount; i++)
     {
         result += CalcPointLight(normal, u_PointLights[i], viewDir, VtxOut.FragPos);
-    } 
+    }
+    for (int i = 0; i < u_SpotLightCount; i++)
+    {
+        result += CalcSpotLight(normal, u_SpotLights[i], viewDir, VtxOut.FragPos);
+    }
+    for (int i = 0; i < u_DirLightCount; i++)
+    {
+        result += CalcDirLight(normal, u_DirLights[i], viewDir);
+    }
 
     color = vec4(result, 1.0) * u_Tint;
 }
@@ -95,4 +131,40 @@ vec3 CalcPointLight(vec3 normal, PointLight light, vec3 viewDir, vec3 fragPos)
     vec3 specular = light.Specular * spec * illuminated;
 
     return attenuation * (ambient + diffuse + specular);
+}
+
+vec3 CalcSpotLight(vec3 normal, SpotLight light, vec3 viewDir, vec3 fragPos)
+{
+    float shininess = 10.0;
+
+    vec3 lightDir = normalize(light.Position - fragPos);
+    float distance = length(light.Position - fragPos);
+    float up = pow(max(dot(normalize(-light.Direction), lightDir), 0.0), shininess);
+    float attenuation = up / (light.Constant + light.Linear * distance + light.Quadratic * (distance * distance));
+    float diff = max(dot(normal, lightDir), 0.0);
+    float illuminated = diff > 0.0 ? 1.0 : 0.0;
+    float spec = pow(max(dot(viewDir, reflect(-lightDir, normal)), 0.0), shininess);
+
+    vec3 ambient = light.Ambient * illuminated;
+    vec3 diffuse = light.Diffuse * diff;
+    vec3 specular = light.Specular * spec * illuminated;
+
+    return attenuation * (ambient + diffuse + specular);
+}
+
+vec3 CalcDirLight(vec3 normal, DirLight light, vec3 viewDir)
+{
+    float shininess = 2.0;
+
+    vec3 lightDir = normalize(-light.Direction);
+    vec3 reflectDir = reflect(-lightDir, normal);
+    float diff = max(dot(normal, lightDir), 0.0);
+    float illuminated = diff > 0.0 ? 1.0 : 0.0;
+    float spec = pow(max(dot(viewDir, reflectDir), 0.0), shininess);
+
+    vec3 ambient = light.Ambient;
+    vec3 diffuse = light.Diffuse * diff;
+    vec3 specular = light.Specular * spec * illuminated;
+
+    return (ambient + diffuse + specular);
 }

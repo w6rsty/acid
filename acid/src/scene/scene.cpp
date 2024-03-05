@@ -1,5 +1,6 @@
 #include "scene/scene.hpp"
 
+#include "renderer/light/light.hpp"
 #include "renderer/renderer3d.hpp"
 
 #include "glm/ext/matrix_transform.hpp"
@@ -19,40 +20,52 @@ Scene::Scene()
 void Scene::Setup()
 {
     camera_ = CreateRef<SceneCamera>();
-    camera_->SetPerspective(1.0f, 45.0f, 0.01f, 1000.0f);
+    camera_->SetPerspective(4.0f / 3.0f, 45.0f, 0.01f, 1000.0f);
     camera_->SetPosition({0.0f, 1.0f, 5.0f});
 
-    texture_ = Texture2D::Create("assets/textures/kobe.png");
+    texture_ = Texture2D::Create("assets/textures/container.jpg");
 
-    for (int i = 0; i < 4; i++)
-    {
-        lights_[i] = PointLight {
-            .Position = {0.0f, 1.0f, 0.0f},
-            .Constant = 1.0f,
-            .Linear = 0.9f,
-            .Quadratic = 0.032f,
-            .Ambient = {0.02f, 0.02f, 0.02f},
-            .Diffuse = {1.0f, 0.9f, 0.7f},
-            .Specular = {0.2f, 0.2f, 0.2f}
-        };
-    }
-    lights_[0].Position = { 1.0f, 2.0f,  1.0f};
-    lights_[1].Position = {-1.0f, 2.0f,  1.0f};
-    lights_[2].Position = {-1.0f, 2.0f, -1.0f};
-    lights_[3].Position = { 1.0f, 2.0f, -1.0f};
-    Renderer3D::SetLight(lights_[0]);
-    Renderer3D::SetLight(lights_[1]);
-    Renderer3D::SetLight(lights_[2]);
-    // Renderer3D::SetLight(lights_[3]);
+    dirLight_ = DirLight {
+        .Direction = {-0.2f, -1.0f, -0.3f},
+        .Ambient = {0.05f, 0.05f, 0.05f},
+        .Diffuse = {0.4f, 0.4f, 0.4f},
+        .Specular = {0.5f, 0.5f, 0.5f}
+    };
+
+    pointLight_ = PointLight {
+        .Position = {2.0f, 2.0f, 2.0f},
+        .Constant = 1.0f,
+        .Linear = 0.9f,
+        .Quadratic = 0.032f,
+        .Ambient = {0.02f, 0.02f, 0.02f},
+        .Diffuse = {1.0f, 0.9f, 0.7f},
+        .Specular = {0.2f, 0.2f, 0.2f}
+    };
+
+    spotLight_ = SpotLight {
+        .Position = {0.0f, 2.0f, 0.0f},
+        .Direction = {0.0f, -1.0f, 0.0f},
+        .Constant = 1.0f,
+        .Linear = 0.09f,
+        .Quadratic = 0.032f,
+        .Ambient = {0.0f, 0.0f, 0.0f},
+        .Diffuse = {1.0f, 0.0f, 0.0f},
+        .Specular = {0.0f, 0.0f, 0.0f},
+    };
+
+    Renderer3D::SetPointLight(pointLight_);
+    Renderer3D::SetDirLight(dirLight_);
+    Renderer3D::SetSpotLight(spotLight_);
+
     RendererCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
     // RendererCommand::DrawWireFrame(true);
 }
 
 void Scene::OnUpdate()
 {
-    for (int i = -3; i <= 3; i++)
+    for (int i = -5; i <= 5; i++)
     {
-        for (int j = -3; j <= 3; j++)
+        for (int j = -5; j <= 5; j++)
         {
             glm::vec3 pos = {1.0f * i, 0.0f, 1.0f * j};
             glm::vec4 color = (i + j) % 2 == 0 
@@ -62,7 +75,7 @@ void Scene::OnUpdate()
         }
     }
 
-    Renderer3D::DrawCuboid(glm::translate(glm::mat4(1.0f), {0, 1, 0}), texture_);
+    Renderer3D::DrawCuboid(glm::translate(glm::mat4(1.0f), { 0, 1, 0}), texture_);
 }
 
 } // namespace acid

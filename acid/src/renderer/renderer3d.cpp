@@ -32,7 +32,9 @@ struct Vertex
 struct RendererData
 {
     RendererStats Stats;
-    const uint32_t MaxPointLights = 10;
+    const uint32_t MaxPointLights = 16;
+    const uint32_t MaxSpotLights = 16;
+    const uint32_t MaxDirLights = 4;
 
     Ref<VertexArray> VoxelVAO = nullptr;
     Ref<Shader> VoxelFlatColorShader = nullptr;
@@ -40,27 +42,51 @@ struct RendererData
 
     Ref<UniformBuffer> MatrixUBO = nullptr;
     Ref<UniformBuffer> LightUBO = nullptr;
-    uint32_t LightIndex = 0;
-    uint32_t LightBufferOffset = 0;
+    uint32_t LightUBOSize = POINT_LIGHT_STD_140_SIZE * MaxPointLights + SPOT_LIGHT_STD_140_SIZE * MaxSpotLights + DIR_LIGHT_STD_140_SIZE * MaxDirLights + sizeof(uint32_t) * 3;
+    uint32_t PointLightIndex = 0;
+    uint32_t PointLightIndexPos = LightUBOSize - sizeof(uint32_t) * 3;
+    uint32_t PointLightBufferOffset = 0;
+    uint32_t SpotLightIndex = 0;
+    uint32_t SpotLightIndexPos = LightUBOSize - sizeof(uint32_t) * 2;
+    uint32_t SpotLightBufferOffset = POINT_LIGHT_STD_140_SIZE * MaxPointLights;
+    uint32_t DirLightIndex = 0;
+    uint32_t DirLightIndexPos = LightUBOSize - sizeof(uint32_t) * 1;
+    uint32_t DirLightBufferOffset = POINT_LIGHT_STD_140_SIZE * MaxPointLights + SPOT_LIGHT_STD_140_SIZE * MaxSpotLights;
     std::vector<PointLight> PointLights;
+    std::vector<SpotLight> SpotLights;
+    std::vector<DirLight> DirLights;
 
     std::function<void()> SetUniformData = [&]() {
         MatrixUBO->SetData(&Camera->GetProjectionMatrix(), sizeof(glm::mat4));
         MatrixUBO->SetData(&Camera->GetViewMatrix(), sizeof(glm::mat4), sizeof(glm::mat4));
+
+        for (auto& light : PointLights)
+        {
+            LightUBO->SetData(&light, POINT_LIGHT_STD_140_SIZE, PointLightBufferOffset);
+            PointLightBufferOffset += POINT_LIGHT_STD_140_SIZE;
+            PointLightIndex++;
+            LightUBO->SetData(&PointLightIndex, sizeof(uint32_t), PointLightIndexPos);
+        }
+        for (auto& light : SpotLights)
+        {
+            LightUBO->SetData(&light, SPOT_LIGHT_STD_140_SIZE, SpotLightBufferOffset);
+            SpotLightBufferOffset += SPOT_LIGHT_STD_140_SIZE;
+            SpotLightIndex++;
+            LightUBO->SetData(&SpotLightIndex, sizeof(uint32_t), SpotLightIndexPos);
+        }
+        for (auto& light : DirLights)
+        {
+            LightUBO->SetData(&light, DIR_LIGHT_STD_140_SIZE, DirLightBufferOffset);
+            DirLightBufferOffset += DIR_LIGHT_STD_140_SIZE;
+            DirLightIndex++;
+            LightUBO->SetData(&DirLightIndex, sizeof(uint32_t), DirLightIndexPos);
+        }
 
         VoxelFlatColorShader->BindUniformBlock("Matrices", 0);
         VoxelTextureShader->BindUniformBlock("Matrices", 0);
 
         VoxelFlatColorShader->BindUniformBlock("Lights", 1);
         VoxelTextureShader->BindUniformBlock("Lights", 1);
-
-        for (auto& light : PointLights)
-        {
-            LightUBO->SetData(&light, POINT_LIGHT_STD_140_SIZE, LightBufferOffset);
-            LightBufferOffset += POINT_LIGHT_STD_140_SIZE;
-            LightIndex++;
-            LightUBO->SetData(&LightIndex, sizeof(uint32_t), POINT_LIGHT_STD_140_SIZE * MaxPointLights);
-        }
     };
     
     Ref<SceneCamera> Camera = nullptr;
@@ -107,7 +133,8 @@ void Renderer3D::Init()
     }
     {
         sData.MatrixUBO = UniformBuffer::Create(2 * sizeof(glm::mat4), 0);
-        sData.LightUBO = UniformBuffer::Create(POINT_LIGHT_STD_140_SIZE * sData.MaxPointLights + sizeof(uint32_t), 1);
+
+        sData.LightUBO = UniformBuffer::Create(sData.LightUBOSize, 1);
     }
 }
 
@@ -130,6 +157,8 @@ void Renderer3D::EndScene()
 {   
     sData.Camera = nullptr;
     sData.PointLights.clear();
+    sData.SpotLights.clear();
+    sData.DirLights.clear();
 }
 
 void Renderer3D::DrawCuboid(const glm::mat4& transform, const glm::vec4& color)
@@ -163,14 +192,34 @@ void Renderer3D::DrawCuboid(const glm::mat4& transform, const Ref<Texture>& text
     sData.Stats.TriangleCount += 12;
 }
 
-void Renderer3D::SetLight(const PointLight& light)
+void Renderer3D::SetPointLight(const PointLight& light)
 {
-    if (sData.LightIndex + 1 >= sData.MaxPointLights) 
+    if (sData.PointLightIndex + 1 >= sData.MaxPointLights) 
     {
         AC_LOG_WARN("Max point lights reached(", sData.MaxPointLights, ")");
         return;
     }
     sData.PointLights.push_back(light);
+}
+
+void Renderer3D::SetSpotLight(const SpotLight& light)
+{
+    if (sData.SpotLightIndex + 1 >= sData.MaxSpotLights) 
+    {
+        AC_LOG_WARN("Max spot lights reached(", sData.MaxSpotLights, ")");
+        return;
+    }
+    sData.SpotLights.push_back(light);
+}
+
+void Renderer3D::SetDirLight(const DirLight& light)
+{
+    if (sData.DirLightIndex + 1 >= sData.MaxDirLights) 
+    {
+        AC_LOG_WARN("Max dir lights reached(", sData.MaxDirLights, ")");
+        return;
+    }
+    sData.DirLights.push_back(light);
 }
 
 const RendererStats& Renderer3D::GetStats()
