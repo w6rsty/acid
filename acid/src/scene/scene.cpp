@@ -21,41 +21,18 @@ void Scene::Setup()
 {
     camera_ = CreateRef<SceneCamera>();
     camera_->SetPerspective(4.0f / 3.0f, 45.0f, 0.01f, 1000.0f);
-    camera_->SetPosition({0.0f, 1.0f, 5.0f});
+    camera_->SetPosition({0.0f, 2.0f, 10.0f});
 
-    texture_ = Texture2D::Create("assets/textures/container.jpg");
+    texture_ = Texture2D::Create("assets/textures/player.png");
 
     dirLight_ = DirLight {
         .Direction = {-0.2f, -1.0f, -0.3f},
         .Ambient = {0.05f, 0.05f, 0.05f},
-        .Diffuse = {0.4f, 0.4f, 0.4f},
+        .Diffuse = {1.0f, 0.9f, 0.7f},
         .Specular = {0.5f, 0.5f, 0.5f}
     };
 
-    pointLight_ = PointLight {
-        .Position = {2.0f, 2.0f, 2.0f},
-        .Constant = 1.0f,
-        .Linear = 0.9f,
-        .Quadratic = 0.032f,
-        .Ambient = {0.02f, 0.02f, 0.02f},
-        .Diffuse = {1.0f, 0.9f, 0.7f},
-        .Specular = {0.2f, 0.2f, 0.2f}
-    };
-
-    spotLight_ = SpotLight {
-        .Position = {0.0f, 2.0f, 0.0f},
-        .Direction = {0.0f, -1.0f, 0.0f},
-        .Constant = 1.0f,
-        .Linear = 0.09f,
-        .Quadratic = 0.032f,
-        .Ambient = {0.0f, 0.0f, 0.0f},
-        .Diffuse = {1.0f, 0.0f, 0.0f},
-        .Specular = {0.0f, 0.0f, 0.0f},
-    };
-
-    Renderer3D::SetPointLight(pointLight_);
     Renderer3D::SetDirLight(dirLight_);
-    Renderer3D::SetSpotLight(spotLight_);
 
     RendererCommand::SetClearColor({0.1f, 0.1f, 0.1f, 1.0f});
     // RendererCommand::DrawWireFrame(true);

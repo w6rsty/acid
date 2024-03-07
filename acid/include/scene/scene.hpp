@@ -24,8 +24,6 @@ private:
     Ref<Texture> texture_;
 
     DirLight dirLight_;
-    PointLight pointLight_;
-    SpotLight spotLight_;
 
     friend class RenderEngine;
 };
