@@ -3,6 +3,7 @@
 #include "renderer/renderer.hpp"
 #include "renderer/light/light.hpp"
 #include "renderer/camera/scene_camera.hpp"
+#include "renderer/light/material.hpp"
 
 #include "glm/glm.hpp"
 
@@ -24,8 +25,7 @@ private:
     Ref<Texture> texture_;
 
     DirLight dirLight_;
-    PointLight pointLight_;
-    SpotLight spotLight_;
+    Material material_;
 
     friend class RenderEngine;
 };

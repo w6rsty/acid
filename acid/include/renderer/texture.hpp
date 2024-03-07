@@ -4,6 +4,7 @@
 #include "renderer/renderer_enum.hpp"
 
 #include <cstdint>
+#include <string>
 
 namespace acid
 {
