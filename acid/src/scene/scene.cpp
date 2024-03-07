@@ -23,12 +23,12 @@ void Scene::Setup()
     camera_->SetPerspective(4.0f / 3.0f, 45.0f, 0.01f, 1000.0f);
     camera_->SetPosition({0.0f, 2.0f, 10.0f});
 
-    texture_ = Texture2D::Create("assets/textures/bulb.png");
+    texture_ = Texture2D::Create("assets/textures/player.png");
 
     dirLight_ = DirLight {
         .Direction = {-0.2f, -1.0f, -0.3f},
         .Ambient = {0.05f, 0.05f, 0.05f},
-        .Diffuse = {0.7f, 0.7f, 0.6f},
+        .Diffuse = {1.0f, 0.9f, 0.7f},
         .Specular = {0.5f, 0.5f, 0.5f}
     };
 

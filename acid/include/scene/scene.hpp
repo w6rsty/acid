@@ -25,7 +25,6 @@ private:
     Ref<Texture> texture_;
 
     DirLight dirLight_;
-    Material material_;
 
     friend class RenderEngine;
 };
