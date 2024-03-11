@@ -27,6 +27,7 @@ public:
 
     virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount) = 0;
     virtual void DrawIndexedArray(const Ref<VertexArray>& vertedxArray, uint32_t indexCount, uint32_t count) = 0;
+    virtual void DrawArray(const Ref<VertexArray>& vertexArray, uint32_t count) = 0;
 private:
     static API s_API;
 };

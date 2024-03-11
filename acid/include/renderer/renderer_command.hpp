@@ -35,6 +35,16 @@ public:
         rendererAPI_->DrawIndexed(vertexArray, indexCount);
     }
 
+    static void DrawIndexedArray(const Ref<VertexArray>& vertexArray, uint32_t indexCount, uint32_t count)
+    {
+        rendererAPI_->DrawIndexedArray(vertexArray, indexCount, count);
+    }
+
+    static void DrawArray(const Ref<VertexArray>& vertexArray, uint32_t count)
+    {
+        rendererAPI_->DrawArray(vertexArray, count);
+    }
+
     static void DrawWireFrame(bool enable = true)
     {
         rendererAPI_->DrawWireFrame(enable);

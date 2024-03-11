@@ -3,6 +3,7 @@ aux_source_directory(./src ACID_SRC_LIST)
 aux_source_directory(./src/core ACID_SRC_LIST)
 aux_source_directory(./src/window ACID_SRC_LIST)
 aux_source_directory(./src/app ACID_SRC_LIST)
+aux_source_directory(./src/geometry ACID_SRC_LIST)
 aux_source_directory(./src/renderer ACID_SRC_LIST)
 aux_source_directory(./src/renderer/light ACID_SRC_LIST)
 aux_source_directory(./src/renderer/camera ACID_SRC_LIST)
@@ -37,8 +38,8 @@ set(ACID_LIBS
     glad
     glm
     debugbreak
-    stb_image
     imgui
+    tinygltf # (stb_image)
     )
 
 target_link_libraries(acid ${ACID_LIBS})

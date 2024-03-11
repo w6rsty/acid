@@ -3,6 +3,7 @@
 #include "core/assert.hpp"
 #include "renderer/renderer_api.hpp"
 #include "platform/OpenGL/opengl_buffer.hpp"
+#include <vector>
 
 namespace acid
 {

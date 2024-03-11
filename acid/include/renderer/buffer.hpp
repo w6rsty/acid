@@ -14,33 +14,55 @@ namespace acid
 
 struct VertexBufferElement
 {
-    VertexDataType  Type;
-    std::string     Name;
-    uint32_t        Size;
-    uint32_t        Offset;
-    bool            Normalized;
+    VertexAttributeDataType Type;
+    std::string Name;
+    size_t Count;
+    size_t Size;
+    size_t Offset;
+    bool Normalized;
 
-    VertexBufferElement(VertexDataType type, const std::string& name, bool normalize = false)
-    : Type(type), Name(name), Size(VertexDataTypeSize(type)), Offset(0), Normalized(normalize)
+    VertexBufferElement(VertexAttributeDataType type, const std::string& name, size_t count = 1, bool normalize = false)
+    : Type(type), Name(name),Count(count), Size(VertexDataTypeSize(type) * count), Offset(0), Normalized(normalize)
     {}
 };
 
 class VertexBufferLayout
 {
 public:
-    VertexBufferLayout() = default;
-    VertexBufferLayout(const std::initializer_list<VertexBufferElement>& elements)
-    : elements_(elements)
+    enum class LayoutType
     {
-        CalculateStride();
-    }
+        Interleave,
+        Batch
+    };
 
-    uint32_t GetStride() const { return stride_; }
+    virtual LayoutType GetType() const = 0;
+    virtual uint32_t GetStride() const = 0;
 
-    std::vector<VertexBufferElement>::iterator begin() { return elements_.begin(); }
-    std::vector<VertexBufferElement>::iterator end() { return elements_.end(); }
-    std::vector<VertexBufferElement>::const_iterator begin() const { return elements_.begin(); }
-    std::vector<VertexBufferElement>::const_iterator end() const { return elements_.end(); }
+    virtual std::vector<VertexBufferElement>::iterator begin() = 0;
+    virtual std::vector<VertexBufferElement>::iterator end() = 0;
+    virtual std::vector<VertexBufferElement>::const_iterator begin() const = 0;
+    virtual std::vector<VertexBufferElement>::const_iterator end() const = 0;
+};
+
+
+class VertexBufferLayoutInterleave final : public VertexBufferLayout
+{
+public:
+    VertexBufferLayoutInterleave() = default;
+    VertexBufferLayoutInterleave(const std::vector<VertexBufferElement>& elements)
+    : elements_(elements)
+    { CalculateStride(); }
+    VertexBufferLayoutInterleave(const std::initializer_list<VertexBufferElement>& elements)
+    : elements_(elements)
+    { CalculateStride(); }
+
+    virtual LayoutType GetType() const override { return LayoutType::Interleave; }
+    virtual uint32_t GetStride() const override { return stride_; }
+
+    virtual std::vector<VertexBufferElement>::iterator begin() override { return elements_.begin(); }
+    virtual std::vector<VertexBufferElement>::iterator end() override { return elements_.end(); }
+    virtual std::vector<VertexBufferElement>::const_iterator begin() const override { return elements_.begin(); }
+    virtual std::vector<VertexBufferElement>::const_iterator end() const override { return elements_.end(); }
 private:
     void CalculateStride()
     {
@@ -56,6 +78,39 @@ private:
     uint32_t stride_ = 0;
 };
 
+class VertexBufferLayoutBatch final : public VertexBufferLayout
+{
+public:
+    VertexBufferLayoutBatch() = default;
+    VertexBufferLayoutBatch(const std::vector<VertexBufferElement>& elements)
+    : elements_(elements)
+    { CalculateStride(); };
+    VertexBufferLayoutBatch(const std::initializer_list<VertexBufferElement>& elements)
+    : elements_(elements)
+    { CalculateStride(); };
+
+    virtual LayoutType GetType() const override { return LayoutType::Batch; }
+    virtual uint32_t GetStride() const override { return stride_; }
+
+    virtual std::vector<VertexBufferElement>::iterator begin() override { return elements_.begin(); }
+    virtual std::vector<VertexBufferElement>::iterator end() override { return elements_.end(); }
+    virtual std::vector<VertexBufferElement>::const_iterator begin() const override { return elements_.begin(); }
+    virtual std::vector<VertexBufferElement>::const_iterator end() const override { return elements_.end(); }
+private:
+    void CalculateStride()
+    {
+        stride_ = 0;
+        for (VertexBufferElement& element : elements_)
+        {
+            element.Offset = stride_;
+            stride_ += element.Size;
+        }
+    }
+private:
+    std::vector<VertexBufferElement> elements_;
+    uint32_t stride_ = 0;
+};
+
 class VertexBuffer
 {
 public:
@@ -64,8 +119,8 @@ public:
     virtual void Bind() const = 0;
     virtual void Unbind() const = 0;
     virtual void SetData(void* data, size_t size, size_t offset = 0) = 0;
-    virtual void SetLayout(const VertexBufferLayout& layout) = 0;
-    virtual VertexBufferLayout& GetLayout() = 0;
+    virtual void SetLayout(const Ref<VertexBufferLayout>& layout) = 0;
+    virtual Ref<VertexBufferLayout>& GetLayout() = 0;
 
     static Ref<VertexBuffer> Create(size_t size);
     static Ref<VertexBuffer> Create(void* vertices, size_t size);
@@ -106,7 +161,6 @@ public:
     static Ref<FrameBuffer> Create(const FrameBufferSpecification& spec);
 };
 
-// let me read LearnOpenGL to finish this
 class UniformBuffer
 {
 public:

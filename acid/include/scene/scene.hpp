@@ -1,5 +1,6 @@
 #pragma once
 
+#include "geometry/model.hpp"
 #include "renderer/renderer.hpp"
 #include "renderer/light/light.hpp"
 #include "renderer/camera/scene_camera.hpp"
@@ -26,6 +27,7 @@ private:
 
     DirLight dirLight_;
 
+    Ref<GltfModel> model_;
     friend class RenderEngine;
 };
 

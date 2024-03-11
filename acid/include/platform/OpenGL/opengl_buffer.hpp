@@ -1,7 +1,8 @@
 #pragma once
 
 #include "renderer/buffer.hpp"
-#include <_types/_uint32_t.h>
+
+#include <cstdint>
 
 namespace acid
 {
@@ -16,11 +17,11 @@ public:
     virtual void Bind() const override;
     virtual void Unbind() const override;
     virtual void SetData(void* data, size_t size, size_t offset) override;
-    virtual void SetLayout(const VertexBufferLayout& layout) override { layout_ = layout; }
-    virtual VertexBufferLayout& GetLayout() override { return layout_; }
+    virtual void SetLayout(const Ref<VertexBufferLayout>& layout) override { layout_ = layout; }
+    virtual Ref<VertexBufferLayout>& GetLayout() override { return layout_; }
 private:
     uint32_t rendererID_;
-    VertexBufferLayout layout_;
+    Ref<VertexBufferLayout> layout_;
 };
 
 class OpenGLIndexBuffer final : public IndexBuffer

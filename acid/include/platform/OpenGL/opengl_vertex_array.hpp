@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/base.hpp"
+#include "renderer/buffer.hpp"
 #include "renderer/vertex_array.hpp"
 
 namespace acid
@@ -22,6 +23,9 @@ public:
     virtual const Ref<IndexBuffer>& GetIndexBuffer() const override { return indexBuffer_; }
 
     virtual uint32_t GetIndexCount() const override { return indexBuffer_->GetCount(); }
+private:
+    void ProcessVertexBufferImpl(Ref<VertexBufferLayoutInterleave> layout); 
+    void ProcessVertexBufferImpl(Ref<VertexBufferLayoutBatch> layout); 
 private:
     uint32_t rendererID_;
 

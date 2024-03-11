@@ -10,3 +10,6 @@
 [submodule "3rdlibs/GLFW"]
 	path = 3rdlibs/GLFW
 	url = https://github.com/glfw/glfw
+[submodule "3rdlibs/tinygltf"]
+	path = 3rdlibs/tinygltf
+	url = https://github.com/syoyo/tinygltf

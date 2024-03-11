@@ -11,8 +11,8 @@ void OpenGLRendererAPI::Init()
     glEnable(GL_BLEND);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ZERO);
 
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+    // glEnable(GL_CULL_FACE);
+    // glCullFace(GL_BACK);
 }
 
 void OpenGLRendererAPI::Shutdown()
@@ -53,6 +53,12 @@ void OpenGLRendererAPI::DrawIndexedArray(const Ref<VertexArray> &vertexArray, ui
 {
     vertexArray->Bind();
     glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0, count);
+}
+
+void OpenGLRendererAPI::DrawArray(const Ref<VertexArray> &vertexArray, uint32_t count)
+{
+    vertexArray->Bind();
+    glDrawArrays(GL_TRIANGLES, 0, count);
 }
 
 } // namespace acid

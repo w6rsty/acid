@@ -3,6 +3,7 @@
 #include "renderer/camera/scene_camera.hpp"
 #include "renderer/texture.hpp"
 #include "renderer/light/light.hpp"
+#include "geometry/model.hpp"
 
 namespace acid
 {
@@ -22,6 +23,10 @@ public:
 
     static void DrawCuboid(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f));
     static void DrawCuboid(const glm::mat4& transform, const Ref<Texture>& texture, const glm::vec4& tint = glm::vec4(1.0f));
+
+    static void DrawCuboidBatch(const glm::mat4& transform, const glm::vec4& color = glm::vec4(1.0f));
+
+    static void DrawModel(const Ref<GltfModel>& model, const glm::mat4& transform = glm::mat4(1.0f), const glm::vec4& color = glm::vec4(1.0f));
 
     static const RendererStats& GetStats();
 };

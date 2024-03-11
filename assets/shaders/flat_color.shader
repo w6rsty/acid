@@ -111,6 +111,7 @@ void main()
         result += CalcDirLight(normal, u_DirLights[i], viewDir);
     }
 
+    // color = vec4(0.5 * (normal + 1.0), 1.0);
     color = vec4(result, 1.0) * u_Tint;
 }
 

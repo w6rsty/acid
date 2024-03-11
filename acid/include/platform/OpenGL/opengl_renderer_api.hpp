@@ -16,6 +16,7 @@ public:
 
     virtual void DrawIndexed(const Ref<VertexArray>& vertexArray, uint32_t indexCount) override;
     virtual void DrawIndexedArray(const Ref<VertexArray>& vertedxArray, uint32_t indexCount, uint32_t count) override;
+    virtual void DrawArray(const Ref<VertexArray>& vertexArray, uint32_t count) override;
 };
 
 } // namespace acid

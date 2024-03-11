@@ -53,9 +53,10 @@ void RenderEngine::Run()
     
     Renderer3D::EndScene();
     frameBuffer_->Unbind();
+    RendererCommand::Clear();
 
     // dockspace
-    // ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
+    ImGui::DockSpaceOverViewport(ImGui::GetMainViewport());
 
     ImGui::Begin("Settings", nullptr);
 

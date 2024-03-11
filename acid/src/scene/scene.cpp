@@ -2,6 +2,7 @@
 
 #include "renderer/light/light.hpp"
 #include "renderer/renderer3d.hpp"
+#include "geometry/model.hpp"
 
 #include "glm/ext/matrix_transform.hpp"
 
@@ -12,7 +13,6 @@ Scene::Scene()
 {
     // read scene
 
-
     // load setups
     Setup();
 }
@@ -21,12 +21,14 @@ void Scene::Setup()
 {
     camera_ = CreateRef<SceneCamera>();
     camera_->SetPerspective(4.0f / 3.0f, 45.0f, 0.01f, 1000.0f);
-    camera_->SetPosition({0.0f, 2.0f, 10.0f});
+    camera_->SetPosition({0.0f, 1.0f, 10.0f});
+
+    model_ = CreateRef<GltfModel>("assets/models/cube.gltf");
 
     texture_ = Texture2D::Create("assets/textures/player.png");
 
     dirLight_ = DirLight {
-        .Direction = {-0.2f, -1.0f, -0.3f},
+        .Direction = {-0.1f, -1.0f, -0.1f},
         .Ambient = {0.05f, 0.05f, 0.05f},
         .Diffuse = {1.0f, 0.9f, 0.7f},
         .Specular = {0.5f, 0.5f, 0.5f}
@@ -40,19 +42,13 @@ void Scene::Setup()
 
 void Scene::OnUpdate()
 {
-    for (int i = -5; i <= 5; i++)
-    {
-        for (int j = -5; j <= 5; j++)
-        {
-            glm::vec3 pos = {1.0f * i, 0.0f, 1.0f * j};
-            glm::vec4 color = (i + j) % 2 == 0 
-                ? glm::vec4(1.0f, 1.0f, 1.0f, 1.0f)
-                : glm::vec4(0.8f, 0.8f, 0.8f, 1.0f);
-            Renderer3D::DrawCuboid(glm::translate(glm::mat4(1.0f), pos), color);
-        }
-    }
+    glm::mat4 model = glm::scale(glm::mat4(1.0f), { 4, 1, 4 });
+    // Renderer3D::DrawCuboid(model);
+    // Renderer3D::DrawModel(model_);
+    Renderer3D::DrawCuboidBatch(model);
 
-    Renderer3D::DrawCuboid(glm::translate(glm::mat4(1.0f), { 0, 1, 0}), texture_);
+    Renderer3D::DrawCuboid(glm::translate(glm::mat4(1.0f), { 0, 1.01, 0}), texture_);
+
 }
 
 } // namespace acid
